@@ -106,6 +106,21 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 
 ## Completed
 
+### 2026-04-18 — Static hosting deploy fix (generateUploadUrls)
+
+- `npx @convex-dev/static-hosting deploy` was failing on the upload step with "Could not find function for 'staticHosting:generateUploadUrls'". The 0.1.3 CLI calls the batched plural functions (`generateUploadUrls`, `recordAssets`) but `convex/staticHosting.ts` was still using the old README snippet that only destructured four singular functions.
+- Updated `convex/staticHosting.ts` to destructure all six functions `exposeUploadApi` returns: `generateUploadUrl`, `generateUploadUrls`, `recordAsset`, `recordAssets`, `gcOldAssets`, `listAssets`.
+- Verified by reading `node_modules/@convex-dev/static-hosting/dist/cli/upload.js:175` (calls `${componentName}:generateUploadUrls`) and `dist/client/index.js:371` (batched helpers exist in the factory). `ReadLints` on the edited file was clean.
+- Files touched: `convex/staticHosting.ts`, `changelog.md`, `files.md`, `TASK.md`.
+
+### 2026-04-18 — Public /about marketing page
+
+- Added `src/pages/About.tsx` as a paper.design inspired editorial landing page. No header, no footer. Huge display type, stacked sections, four large SVG product mockups in `public/about/` (`builder.svg`, `queue.svg`, `ticket.svg`, `results.svg`). Full feature list grouped by Build, Publish, Moderate, Ticket mode, Review, Observe. Stack table plus closing CTA.
+- Wired `/about` into `src/App.tsx`.
+- Added the About link on the homepage only, inline next to "For Convex by Convex." in `src/components/auth/SignIn.tsx`. No other surface links to About.
+- Verified with `npx tsc --noEmit -p tsconfig.app.json` and `ReadLints`. Both clean.
+- Files touched: `src/pages/About.tsx` (new), `public/about/builder.svg` (new), `public/about/queue.svg` (new), `public/about/ticket.svg` (new), `public/about/results.svg` (new), `src/App.tsx`, `src/components/auth/SignIn.tsx`, `files.md`, `changelog.md`, `TASK.md`.
+
 ### 2026-04-18 23:20 UTC — Docs: OWNER_EMAIL commands in every setup block
 
 - Added `npx convex env set OWNER_EMAIL you@yourdomain.com` and the `--prod` variant to every copy-paste command block in the setup docs so anyone forking Forge sees the command where they are already running `npx convex env set`, not just mentioned inline.

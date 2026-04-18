@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-label="Forge form builder mockup">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f4f5ec"/>
+      <stop offset="100%" stop-color="#eeefe7"/>
+    </linearGradient>
+    <filter id="softShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="4" dy="6" stdDeviation="8" flood-color="#151515" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bgGrad)"/>
+
+  <!-- Window frame -->
+  <g filter="url(#softShadow)">
+    <rect x="80" y="80" width="1440" height="840" rx="14" fill="#ffffff" stroke="#d6d3c7" stroke-width="1"/>
+
+    <!-- Title bar -->
+    <rect x="80" y="80" width="1440" height="52" rx="14" fill="#eeefe7"/>
+    <rect x="80" y="124" width="1440" height="10" fill="#eeefe7"/>
+    <line x1="80" y1="132" x2="1520" y2="132" stroke="#d6d3c7" stroke-width="1"/>
+    <circle cx="108" cy="106" r="6" fill="#f3665c"/>
+    <circle cx="128" cy="106" r="6" fill="#f6c75a"/>
+    <circle cx="148" cy="106" r="6" fill="#58c88f"/>
+    <text x="180" y="111" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#676565" letter-spacing="0.5">forge / forms / applications</text>
+
+    <!-- Header row -->
+    <text x="112" y="188" font-family="Inter, sans-serif" font-size="26" font-weight="700" fill="#151515" letter-spacing="-0.5">Applications</text>
+    <text x="112" y="216" font-family="Inter, sans-serif" font-size="14" font-weight="400" fill="#676565">/apply &middot; 6 fields &middot; Published</text>
+
+    <!-- Top action buttons -->
+    <rect x="1180" y="170" width="120" height="38" rx="8" fill="#ffffff" stroke="#d6d3c7"/>
+    <text x="1240" y="194" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#151515" text-anchor="middle">Save draft</text>
+    <rect x="1312" y="170" width="190" height="38" rx="8" fill="#151515"/>
+    <text x="1407" y="194" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#ffffff" text-anchor="middle">Update Discord command</text>
+
+    <!-- Left pane: Command settings -->
+    <rect x="112" y="248" width="420" height="640" rx="10" fill="#fafbf4" stroke="#e3e0d3"/>
+    <text x="136" y="282" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#676565" letter-spacing="1">COMMAND SETTINGS</text>
+
+    <text x="136" y="316" font-family="Inter, sans-serif" font-size="12" fill="#676565">Title</text>
+    <rect x="136" y="326" width="372" height="40" rx="8" fill="#ffffff" stroke="#d6d3c7"/>
+    <text x="152" y="351" font-family="Inter, sans-serif" font-size="14" fill="#151515">Community application</text>
+
+    <text x="136" y="390" font-family="Inter, sans-serif" font-size="12" fill="#676565">Slash command</text>
+    <rect x="136" y="400" width="372" height="40" rx="8" fill="#ffffff" stroke="#d6d3c7"/>
+    <text x="152" y="425" font-family="'JetBrains Mono', monospace" font-size="14" fill="#151515">/apply</text>
+
+    <text x="136" y="464" font-family="Inter, sans-serif" font-size="12" fill="#676565">Mod queue channel</text>
+    <rect x="136" y="474" width="372" height="40" rx="8" fill="#ffffff" stroke="#d6d3c7"/>
+    <text x="152" y="499" font-family="Inter, sans-serif" font-size="14" fill="#151515">#mod-queue</text>
+
+    <text x="136" y="538" font-family="Inter, sans-serif" font-size="12" fill="#676565">Destination</text>
+    <rect x="136" y="548" width="372" height="40" rx="8" fill="#ffffff" stroke="#d6d3c7"/>
+    <text x="152" y="573" font-family="Inter, sans-serif" font-size="14" fill="#151515">#applications (forum)</text>
+
+    <!-- Toggle row -->
+    <rect x="136" y="612" width="372" height="46" rx="8" fill="#ffffff" stroke="#d6d3c7"/>
+    <text x="152" y="640" font-family="Inter, sans-serif" font-size="13" fill="#151515">Requires approval</text>
+    <rect x="454" y="624" width="40" height="22" rx="11" fill="#f54e00"/>
+    <circle cx="484" cy="635" r="8" fill="#ffffff"/>
+
+    <rect x="136" y="670" width="372" height="46" rx="8" fill="#ffffff" stroke="#d6d3c7"/>
+    <text x="152" y="698" font-family="Inter, sans-serif" font-size="13" fill="#151515">Ticket mode</text>
+    <rect x="454" y="682" width="40" height="22" rx="11" fill="#d6d3c7"/>
+    <circle cx="464" cy="693" r="8" fill="#ffffff"/>
+
+    <!-- Center pane: Modal fields -->
+    <rect x="548" y="248" width="480" height="640" rx="10" fill="#ffffff" stroke="#e3e0d3"/>
+    <text x="572" y="282" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#676565" letter-spacing="1">MODAL FIELDS</text>
+    <text x="988" y="282" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#f54e00" text-anchor="end">+ Add field</text>
+
+    <!-- Field card 1 -->
+    <rect x="572" y="304" width="432" height="92" rx="8" fill="#fafbf4" stroke="#e3e0d3"/>
+    <rect x="588" y="320" width="48" height="22" rx="11" fill="#eeefe7"/>
+    <text x="612" y="335" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#676565" text-anchor="middle">short</text>
+    <text x="648" y="336" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Your Discord handle</text>
+    <text x="588" y="368" font-family="Inter, sans-serif" font-size="12" fill="#676565">Required &middot; max 32 chars</text>
+
+    <!-- Field card 2 -->
+    <rect x="572" y="408" width="432" height="92" rx="8" fill="#fafbf4" stroke="#e3e0d3"/>
+    <rect x="588" y="424" width="48" height="22" rx="11" fill="#fff0e6"/>
+    <text x="612" y="439" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#f54e00" text-anchor="middle">email</text>
+    <text x="648" y="440" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Contact email</text>
+    <text x="588" y="472" font-family="Inter, sans-serif" font-size="12" fill="#676565">Private &middot; hidden from public channel</text>
+
+    <!-- Field card 3 -->
+    <rect x="572" y="512" width="432" height="92" rx="8" fill="#fafbf4" stroke="#e3e0d3"/>
+    <rect x="588" y="528" width="72" height="22" rx="11" fill="#eeefe7"/>
+    <text x="624" y="543" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#676565" text-anchor="middle">paragraph</text>
+    <text x="672" y="544" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Why do you want to join</text>
+    <text x="588" y="576" font-family="Inter, sans-serif" font-size="12" fill="#676565">Required &middot; max 400 chars</text>
+
+    <!-- Field card 4 -->
+    <rect x="572" y="616" width="432" height="92" rx="8" fill="#fafbf4" stroke="#e3e0d3"/>
+    <rect x="588" y="632" width="48" height="22" rx="11" fill="#eeefe7"/>
+    <text x="612" y="647" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#676565" text-anchor="middle">select</text>
+    <text x="648" y="648" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">How did you hear about us</text>
+    <text x="588" y="680" font-family="Inter, sans-serif" font-size="12" fill="#676565">4 options</text>
+
+    <!-- Field card 5 -->
+    <rect x="572" y="720" width="432" height="92" rx="8" fill="#fafbf4" stroke="#e3e0d3"/>
+    <rect x="588" y="736" width="60" height="22" rx="11" fill="#eeefe7"/>
+    <text x="618" y="751" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#676565" text-anchor="middle">number</text>
+    <text x="660" y="752" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#151515">Hours per week</text>
+    <text x="588" y="784" font-family="Inter, sans-serif" font-size="12" fill="#676565">min 1 &middot; max 40</text>
+
+    <!-- Right pane: Discord preview -->
+    <rect x="1044" y="248" width="460" height="640" rx="10" fill="#2b2d31" stroke="#1f2024"/>
+    <text x="1068" y="282" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#b5bac1" letter-spacing="1">DISCORD PREVIEW</text>
+
+    <!-- Discord modal mock -->
+    <rect x="1068" y="304" width="412" height="560" rx="8" fill="#313338"/>
+    <text x="1088" y="340" font-family="Inter, sans-serif" font-size="17" font-weight="700" fill="#f2f3f5">Community application</text>
+    <rect x="1088" y="354" width="372" height="1" fill="#3f4249"/>
+
+    <text x="1088" y="382" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#b5bac1" letter-spacing="0.5">YOUR DISCORD HANDLE *</text>
+    <rect x="1088" y="392" width="372" height="40" rx="3" fill="#1e1f22" stroke="#26272b"/>
+    <text x="1104" y="417" font-family="Inter, sans-serif" font-size="14" fill="#b5bac1">@waynesutton</text>
+
+    <text x="1088" y="456" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#b5bac1" letter-spacing="0.5">CONTACT EMAIL *</text>
+    <rect x="1088" y="466" width="372" height="40" rx="3" fill="#1e1f22" stroke="#26272b"/>
+    <text x="1104" y="491" font-family="Inter, sans-serif" font-size="14" fill="#b5bac1">wayne@convex.dev</text>
+
+    <text x="1088" y="530" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#b5bac1" letter-spacing="0.5">WHY DO YOU WANT TO JOIN *</text>
+    <rect x="1088" y="540" width="372" height="110" rx="3" fill="#1e1f22" stroke="#26272b"/>
+    <text x="1104" y="565" font-family="Inter, sans-serif" font-size="14" fill="#b5bac1">I build with Convex every day and want</text>
+    <text x="1104" y="585" font-family="Inter, sans-serif" font-size="14" fill="#b5bac1">to ship my first Discord bot using Forge&hellip;</text>
+
+    <text x="1088" y="674" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#b5bac1" letter-spacing="0.5">HOURS PER WEEK *</text>
+    <rect x="1088" y="684" width="372" height="40" rx="3" fill="#1e1f22" stroke="#26272b"/>
+    <text x="1104" y="709" font-family="Inter, sans-serif" font-size="14" fill="#b5bac1">10</text>
+
+    <rect x="1088" y="802" width="96" height="38" rx="3" fill="#4e5058"/>
+    <text x="1136" y="826" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#ffffff" text-anchor="middle">Cancel</text>
+    <rect x="1196" y="802" width="264" height="38" rx="3" fill="#5865f2"/>
+    <text x="1328" y="826" font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#ffffff" text-anchor="middle">Submit</text>
+  </g>
+</svg>

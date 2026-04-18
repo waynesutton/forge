@@ -89,7 +89,18 @@ export function SignIn() {
             ) : null}
 
             <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-4">
-              <p className="text-xs text-[var(--color-muted)]">For Convex by Convex.</p>
+              <p className="flex items-center gap-1.5 text-xs text-[var(--color-muted)]">
+                <span>For Convex by Convex.</span>
+                {/* About page link. Only rendered on the public homepage so
+                    signed-out visitors can read the marketing story before
+                    requesting access. Kept inline with the attribution so it
+                    reads as a single footnote rather than a nav item. */}
+                <Link
+                  to="/about"
+                  className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-border)] underline-offset-4 transition-colors hover:decoration-[var(--color-ink)]">
+                  About
+                </Link>
+              </p>
               {/* Public docs link. Same route a logged-in admin sees, so
                   anyone evaluating Forge can read the setup guide before
                   requesting access. */}

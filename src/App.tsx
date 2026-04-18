@@ -7,6 +7,7 @@ import {
 } from "react-router";
 import { SignIn } from "./components/auth/SignIn";
 import { Protected } from "./components/auth/Protected";
+import { About } from "./pages/About";
 import { Dashboard } from "./pages/Dashboard";
 import { Docs } from "./pages/Docs";
 import { EditForm } from "./pages/EditForm";
@@ -32,6 +33,7 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<SignIn />} />
+        <Route path="/about" element={<About />} />
         <Route path="/auth/sign-in" element={<SignIn />} />
         <Route path="/auth/denied" element={<AccessDenied />} />
         <Route path="/docs" element={<Docs />} />

@@ -4,6 +4,17 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 
 ## [Unreleased]
 
+### Fixed
+
+- Static hosting deploy failed with `Could not find function for 'staticHosting:generateUploadUrls'`. Root cause: the `@convex-dev/static-hosting@0.1.3` CLI calls the batched `generateUploadUrls` (plural) and `recordAssets` helpers introduced in 0.1.3, but `convex/staticHosting.ts` was still destructuring only the four functions the README example shows (`generateUploadUrl`, `recordAsset`, `gcOldAssets`, `listAssets`). The batched helpers therefore never got registered as Convex functions, so the CLI's `npx convex run staticHosting:generateUploadUrls` blew up with "Did you forget to run `npx convex dev`?" halfway through `npx @convex-dev/static-hosting deploy`. Fix: added `generateUploadUrls` and `recordAssets` to the destructured export so every function the CLI expects is now registered. No app code change beyond the one destructuring line. Verified with `ReadLints` on `convex/staticHosting.ts` (clean). File-by-file check in `node_modules/@convex-dev/static-hosting/dist/cli/upload.js:175` confirmed the CLI calls the plural name.
+
+### Added
+
+- Public `/about` marketing page. `src/pages/About.tsx` ships a paper.design inspired editorial layout with huge display type and four large SVG product mockups stored at `public/about/builder.svg`, `public/about/queue.svg`, `public/about/ticket.svg`, and `public/about/results.svg`. Sections: hero with sign in and docs CTAs, intro positioning ("one app, every step of the form"), builder mockup with a four point grid, dark Discord band with a mod queue embed, a full six-group feature index (Build, Publish, Moderate, Ticket mode, Review, Observe) plus a 12-item legend row, ticket lifecycle visual, results dashboard mockup, dark stack table, and a closing CTA. Matches the existing Forge tokens (ink, accent, beige, surface). No header and no footer, per brief.
+- Route wired in `src/App.tsx` at `/about`. Catch-all redirect to `/` still covers every other unknown path.
+- About link on the homepage only. `src/components/auth/SignIn.tsx` now renders "For Convex by Convex. About" as an inline attribution with the word "About" linking to `/about`. Kept the existing "Read the setup guide" link on the opposite side of the footer row. No other page links to About, so the marketing story stays scoped to the sign in surface.
+- Verification: `npx tsc --noEmit -p tsconfig.app.json` clean. `ReadLints` on `src/pages/About.tsx`, `src/App.tsx`, and `src/components/auth/SignIn.tsx` clean.
+
 ### Security
 
 - Shipped fixes for every HIGH / MEDIUM / LOW finding from the 2026-04-18 Convex security audit. Full disposition lives in `prds/security-audit-fixes-2026-04-18.md`.

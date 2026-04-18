@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-label="Ticket mode lifecycle in a forum thread">
+  <defs>
+    <linearGradient id="tbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eeefe7"/>
+      <stop offset="100%" stop-color="#e6e7dd"/>
+    </linearGradient>
+    <filter id="tShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="4" dy="8" stdDeviation="12" flood-color="#151515" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#tbg)"/>
+
+  <!-- Lifecycle timeline header -->
+  <text x="120" y="140" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="#676565" letter-spacing="1.5">TICKET LIFECYCLE</text>
+  <text x="120" y="210" font-family="Inter, sans-serif" font-size="72" font-weight="700" fill="#151515" letter-spacing="-2">Open &rarr; Claimed &rarr; Resolved &rarr; Closed</text>
+
+  <!-- Three forum thread cards side by side -->
+  <g filter="url(#tShadow)">
+    <!-- Card 1: Open -->
+    <rect x="120" y="300" width="460" height="560" rx="14" fill="#313338"/>
+    <rect x="120" y="300" width="460" height="8" rx="14" fill="#f54e00"/>
+    <text x="152" y="358" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#f54e00" letter-spacing="1">OPEN</text>
+    <text x="152" y="400" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#f2f3f5">Login loop on mobile Safari</text>
+
+    <text x="152" y="446" font-family="Inter, sans-serif" font-size="13" fill="#b5bac1">Submitted by @priya</text>
+    <text x="152" y="470" font-family="Inter, sans-serif" font-size="13" fill="#949ba4">2 min ago</text>
+
+    <line x1="152" y1="490" x2="548" y2="490" stroke="#3f4249"/>
+    <text x="152" y="522" font-family="Inter, sans-serif" font-size="14" fill="#dbdee1">Bot redirects back to /auth after</text>
+    <text x="152" y="544" font-family="Inter, sans-serif" font-size="14" fill="#dbdee1">I enter my credentials. Only</text>
+    <text x="152" y="566" font-family="Inter, sans-serif" font-size="14" fill="#dbdee1">happens on iOS 17+.</text>
+
+    <rect x="152" y="720" width="108" height="42" rx="6" fill="#5865f2"/>
+    <text x="206" y="747" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Claim</text>
+
+    <rect x="276" y="720" width="108" height="42" rx="6" fill="#4e5058"/>
+    <text x="330" y="747" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Resolve</text>
+
+    <rect x="400" y="720" width="108" height="42" rx="6" fill="#4e5058"/>
+    <text x="454" y="747" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Close</text>
+
+    <text x="152" y="812" font-family="Inter, sans-serif" font-size="12" fill="#949ba4">Auto-close after 7 days inactive</text>
+
+    <!-- Card 2: In progress -->
+    <rect x="600" y="300" width="460" height="560" rx="14" fill="#313338"/>
+    <rect x="600" y="300" width="460" height="8" rx="14" fill="#f6c75a"/>
+    <text x="632" y="358" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#f6c75a" letter-spacing="1">IN PROGRESS</text>
+    <text x="632" y="400" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#f2f3f5">Login loop on mobile Safari</text>
+
+    <text x="632" y="446" font-family="Inter, sans-serif" font-size="13" fill="#b5bac1">Claimed by @wayne</text>
+    <text x="632" y="470" font-family="Inter, sans-serif" font-size="13" fill="#949ba4">14 min ago</text>
+
+    <line x1="632" y1="490" x2="1028" y2="490" stroke="#3f4249"/>
+    <text x="632" y="522" font-family="Inter, sans-serif" font-size="14" fill="#dbdee1">@wayne: can repro. Looks like</text>
+    <text x="632" y="544" font-family="Inter, sans-serif" font-size="14" fill="#dbdee1">a cookie partitioning issue.</text>
+    <text x="632" y="566" font-family="Inter, sans-serif" font-size="14" fill="#dbdee1">Patch going out tonight.</text>
+
+    <rect x="632" y="720" width="108" height="42" rx="6" fill="#4e5058"/>
+    <text x="686" y="747" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Unclaim</text>
+
+    <rect x="756" y="720" width="108" height="42" rx="6" fill="#248046"/>
+    <text x="810" y="747" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Resolve</text>
+
+    <rect x="880" y="720" width="108" height="42" rx="6" fill="#4e5058"/>
+    <text x="934" y="747" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Close</text>
+
+    <text x="632" y="812" font-family="Inter, sans-serif" font-size="12" fill="#949ba4">Assignee can unclaim at any time</text>
+
+    <!-- Card 3: Resolved -->
+    <rect x="1080" y="300" width="400" height="560" rx="14" fill="#313338"/>
+    <rect x="1080" y="300" width="400" height="8" rx="14" fill="#2d8e64"/>
+    <text x="1112" y="358" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#2d8e64" letter-spacing="1">RESOLVED</text>
+    <text x="1112" y="400" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#f2f3f5">Login loop on mobile</text>
+    <text x="1112" y="428" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#f2f3f5">Safari</text>
+
+    <text x="1112" y="472" font-family="Inter, sans-serif" font-size="13" fill="#b5bac1">Resolved by @wayne</text>
+    <text x="1112" y="496" font-family="Inter, sans-serif" font-size="13" fill="#949ba4">a few seconds ago</text>
+
+    <line x1="1112" y1="520" x2="1448" y2="520" stroke="#3f4249"/>
+    <text x="1112" y="552" font-family="Inter, sans-serif" font-size="14" fill="#dbdee1">Shipped in v1.4.2. Thanks for</text>
+    <text x="1112" y="574" font-family="Inter, sans-serif" font-size="14" fill="#dbdee1">the detailed repro.</text>
+
+    <rect x="1112" y="720" width="108" height="42" rx="6" fill="#4e5058"/>
+    <text x="1166" y="747" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Reopen</text>
+
+    <rect x="1236" y="720" width="108" height="42" rx="6" fill="#4e5058"/>
+    <text x="1290" y="747" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff" text-anchor="middle">Close</text>
+
+    <text x="1112" y="812" font-family="Inter, sans-serif" font-size="12" fill="#949ba4">Forum thread archives on close</text>
+  </g>
+</svg>
