@@ -93,7 +93,7 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 - [x] DM submitter on approve and deny
 - [x] Hide, unhide, and delete submissions from the dashboard with optional Discord cleanup
 - [x] Results page styling pass with status pills, copy to clipboard, and soft-hidden rendering
-- [ ] PostHog design refinement pass on every surface
+- [ ] Design refinement pass on every surface
 - [ ] Loading skeletons and error states
 
 ### Phase 6: Production (day 6-7)
@@ -105,6 +105,31 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 - [ ] Signature verify fuzz test
 
 ## Completed
+
+### 2026-04-18 — Marketing copy, SEO metadata, favicon, auth screen polish
+
+- Added a developer marketing intro to `README.md` describing who Forge is for, what it replaces, and the Convex-only deployment tradeoffs.
+- Rewrote `index.html` with full SEO metadata: `<title>`, rich description, keywords, `theme-color`, Open Graph tags, Twitter summary card, `robots`, SVG favicon link, and an Apple touch icon fallback.
+- Created `public/favicon.svg`. Rounded beige square with 1px border and an orange lightning bolt (`#f54e00`) that matches the in-app Lightning icon.
+- Simplified the `/auth/denied` copy in `src/pages/AccessDenied.tsx`. Removed the primary-email paragraph; the screen now reads a single line: "Forge is limited to Convex team accounts."
+- Replaced the terms of use footnote on `/auth/sign-in` with "For Convex by Convex." to reflect that the app is internal tooling.
+- Top-aligned the sign-in layout so the card sits above the fold on a laptop. Added an "Inside Forge" feature grid under the card with eight Phosphor icon rows (form builder, slash commands, mod queue, ticket mode, audit log, CSV and PDF export, private fields, reply from dashboard). Kept the existing window-chrome style and accent color.
+- Updated `files.md` rows for `README.md`, `index.html`, `public/favicon.svg`, `src/components/auth/SignIn.tsx`, and `src/pages/AccessDenied.tsx` to match the changes.
+- Verified with `npx tsc --noEmit -p tsconfig.app.json` (clean) and `ReadLints` on every touched file (clean).
+
+### 2026-04-18 — README and brand scrub
+
+- Wrote `README.md` with what Forge does, feature list, stack, getting started, scripts, access model, and links to `prds/forge-prd_1.md`, `files.md`, `changelog.md`, `TASK.md`, and `docs/discord-setup.md`.
+- Removed third-party brand references from design tokens and docs. Touched `src/styles/index.css`, `files.md`, `TASK.md`, `prds/forge-prd_1.md`, and `prds/access-control.md`.
+- Flipped the `README.md` row in `files.md` from `planned` to `live`.
+
+### 2026-04-18 — Ticket mode role gates
+
+- Added per-form Claim role and Resolve role pickers under the Ticket mode panel in `src/pages/EditForm.tsx`. Admins set which roles can press each button beyond the built-in admin + mod gate.
+- Schema: `forms.ticketClaimRoleIds` and `forms.ticketResolveRoleIds` (optional arrays). Normalized and validated against cached guild roles in `convex/forms.ts:update`.
+- `convex/submissions.ts:routeContext` surfaces both role lists on `form` so the Discord path can gate buttons per action.
+- `convex/http.ts:handleTicketButton` replaces the old single mod-role check with a per-action evaluator. Claim: admin or mod or claim role. Resolve: admin or mod or resolve role or submitter. Close: admin or mod or submitter. Reopen: admin or mod. Unclaim: admin or mod or current assignee (mutation still enforces `not_assignee`). Added `hasAdministratorPermission` (reads Discord's bit 0x8 from `member.permissions`) and `ticketActionDenial` helpers.
+- Verified with `npx tsc --noEmit` and `npm run lint:code`.
 
 ### 2026-04-18 — Form activity logs, email privacy, Discord error hints
 

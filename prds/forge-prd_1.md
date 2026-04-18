@@ -1,6 +1,6 @@
 # Forge — Tech PRD
 
-A self-hostable Discord form builder and approval engine. Create forms in a PostHog-style dashboard, submit via Discord slash commands, route through mod approval, publish to any channel including Forum channels with tags.
+A self-hostable Discord form builder and approval engine. Create forms in a document-window style dashboard, submit via Discord slash commands, route through mod approval, publish to any channel including Forum channels with tags.
 
 **Stack:** React 19 + Vite + Convex + Robelest Convex Auth (GitHub OAuth) + Discord HTTP Interactions
 **Hosting:** `@convex-dev/static-hosting` (frontend) + Convex HTTP actions (backend + Discord bot)
@@ -12,7 +12,7 @@ A self-hostable Discord form builder and approval engine. Create forms in a Post
 
 ### Goals
 
-- A dashboard for creating and editing forms visually, similar to how PostHog organizes features.
+- A dashboard for creating and editing forms visually with a document-window aesthetic.
 - Forms map to Discord slash commands. One form equals one command.
 - Submissions can route to any channel: text or Forum, public or private.
 - Optional approval gate: submissions land in a mod queue, mods click Approve or Deny.
@@ -73,7 +73,7 @@ A self-hostable Discord form builder and approval engine. Create forms in a Post
 | Layer | Choice | Why |
 |---|---|---|
 | Frontend framework | React 19 + Vite | Fast, native TS, matches your stack |
-| Styling | Tailwind v4 + custom design tokens | Enables PostHog-style aesthetic |
+| Styling | Tailwind v4 + custom design tokens | Enables the document-window aesthetic |
 | UI primitives | Radix UI + shadcn/ui | Accessible, themeable |
 | Form builder drag-drop | dnd-kit | Modern, accessible, React-first |
 | Backend | Convex | Realtime, serverless, one deploy |
@@ -375,7 +375,7 @@ Same as 7.5 or 7.6, skipping the queue. Status jumps from "pending" to "auto_pub
 /app/settings              → guild connection, bot tokens, team
 ```
 
-### 8.2 Design system (PostHog-inspired)
+### 8.2 Design system
 
 **Aesthetic:** playful-professional. Document-window feel. Slight retro warmth. Serious where it counts (data, forms).
 
@@ -394,7 +394,7 @@ export default {
         ink: "#151515",            // primary text
         muted: "#676565",          // secondary text
         border: "#D6D3C7",         // soft border
-        accent: "#F54E00",         // PostHog-style orange
+        accent: "#F54E00",         // signature orange
         accentHover: "#D93F00",
         success: "#2D8E64",
         danger: "#C14040",
@@ -418,12 +418,12 @@ export default {
 
 **Key UI patterns:**
 
-- **Document window chrome.** Every major panel gets a top bar with a window-style title and optional tabs, mimicking the PostHog home.mdx editor frame.
+- **Document window chrome.** Every major panel gets a top bar with a window-style title and optional tabs.
 - **Hand-drawn accent illustrations.** Consider using simple SVG doodles (optional, v2).
 - **Subtle grid or paper texture on background** (optional, v2).
 - **Generous whitespace, 16px base font, 1.5 line-height.**
 - **Chunky buttons with soft shadows.**
-- **Tab navigation over sidebar** for major sections, matching the PostHog reference.
+- **Tab navigation over sidebar** for major sections.
 
 ### 8.3 Core components
 
@@ -454,7 +454,7 @@ export default {
 
 ### 8.4 Form builder UX
 
-The builder is the hero feature. Inspired by Typeform + Notion + PostHog:
+The builder is the hero feature. Inspired by Typeform + Notion:
 
 1. **Left pane (30%):** live list of fields, drag to reorder, click to edit.
 2. **Center pane (40%):** inline field editor — label, type, required, placeholder.
@@ -658,7 +658,7 @@ Robel auth CLI; do not check them into source. `AUTH_GITHUB_ID` and
 - [ ] Audit log
 - [ ] Cooldowns
 - [ ] DM on approve/deny
-- [ ] PostHog design refinement pass
+- [ ] Design refinement pass
 - [ ] Error states, loading skeletons
 
 ### Phase 6: Production (day 6-7)

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* PostHog-inspired design tokens. Tailwind v4 reads @theme vars as utilities. */
+/* Forge design tokens. Tailwind v4 reads @theme vars as utilities. */
 @theme {
   --color-bg: #eeefe7;
   --color-surface: #ffffff;

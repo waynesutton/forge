@@ -78,13 +78,7 @@ export function AccessDenied() {
           ) : null}
 
           <p className="text-sm text-[var(--color-muted)]">
-            Your GitHub account&rsquo;s primary email is not a{" "}
-            <span className="font-medium text-[var(--color-ink)]">
-              @convex.dev
-            </span>{" "}
-            address. Make sure your Convex work email is your primary on
-            GitHub, then sign in again. If you still hit this page, ask the
-            workspace owner to invite you.
+            Forge is limited to Convex team accounts.
           </p>
 
           <Link

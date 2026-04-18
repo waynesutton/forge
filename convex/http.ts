@@ -67,6 +67,10 @@ type DiscordComponentInteraction = {
   guild_id?: string;
   member?: {
     roles?: Array<string>;
+    // Discord sends the member's resolved permission bitfield as a
+    // stringified bigint. We only check the Administrator bit (0x8) so a
+    // server admin always passes the ticket gate even without a mod role.
+    permissions?: string;
     user?: {
       id?: string;
       username?: string;
@@ -742,6 +746,58 @@ function hasAnyRole(memberRoles: Array<string>, blockedRoleIds: Array<string>) {
   return blockedRoleIds.some((roleId) => memberRoles.includes(roleId));
 }
 
+// Discord's Administrator bit. `member.permissions` is a stringified bigint
+// of the member's resolved channel permissions, so we parse with BigInt and
+// AND against 0x8. Anything falsy (missing, unparseable) means "not admin".
+function hasAdministratorPermission(permissions: string | undefined): boolean {
+  if (!permissions) return false;
+  try {
+    return (BigInt(permissions) & 0x8n) === 0x8n;
+  } catch {
+    return false;
+  }
+}
+
+// Per-button role gate for ticket mode. Returns an ephemeral message when
+// the member is not allowed to press this button at all, otherwise returns
+// `undefined` and lets the mutation run. The submitter-specific and
+// assignee-specific rules are folded into the booleans passed in.
+function ticketActionDenial(
+  action: "claim" | "unclaim" | "resolve" | "reopen" | "close",
+  flags: {
+    canClaim: boolean;
+    canUnclaim: boolean;
+    canResolve: boolean;
+    canClose: boolean;
+    canReopen: boolean;
+  },
+): string | undefined {
+  switch (action) {
+    case "claim":
+      return flags.canClaim
+        ? undefined
+        : "You do not have a role that can claim this ticket.";
+    case "unclaim":
+      return flags.canUnclaim
+        ? undefined
+        : "Only the assignee or a mod can unclaim this ticket.";
+    case "resolve":
+      return flags.canResolve
+        ? undefined
+        : "You do not have a role that can resolve this ticket.";
+    case "close":
+      return flags.canClose
+        ? undefined
+        : "Only the submitter or a mod can close this ticket.";
+    case "reopen":
+      return flags.canReopen
+        ? undefined
+        : "Only a mod can reopen a closed ticket.";
+    default:
+      return "That action could not be completed.";
+  }
+}
+
 // Extracts the `<submissionId>` tail from `approve:<id>` and `deny:<id>`
 // custom ids. Returns `undefined` if the prefix does not match so the
 // handler can bail out with a clean ephemeral error.
@@ -820,12 +876,41 @@ async function handleTicketButton(
     return ephemeralResponse("Ticket mode is off for this form.");
   }
 
-  const modRoles = context.form.modRoleIds ?? [];
   const memberRoles = payload.member?.roles ?? [];
-  if (modRoles.length > 0 && !hasAnyRole(memberRoles, modRoles)) {
-    return ephemeralResponse(
-      "You do not have a mod role configured for this form.",
-    );
+  const isAdmin = hasAdministratorPermission(payload.member?.permissions);
+  const isMod = hasAnyRole(memberRoles, context.form.modRoleIds ?? []);
+  const isSubmitter = context.submission.submitterId === moderatorId;
+  const canClaim =
+    isAdmin ||
+    isMod ||
+    hasAnyRole(memberRoles, context.form.ticketClaimRoleIds ?? []);
+  const canResolve =
+    isAdmin ||
+    isMod ||
+    isSubmitter ||
+    hasAnyRole(memberRoles, context.form.ticketResolveRoleIds ?? []);
+  const canClose = isAdmin || isMod || isSubmitter;
+  const canReopen = isAdmin || isMod;
+  // Unclaim is allowed for the current assignee too; the mutation enforces
+  // that rule strictly with `not_assignee`, so we only need to let the
+  // request through here without a role.
+  const isAssignee =
+    !!context.submission.assignedToUserId &&
+    context.submission.assignedToUserId === moderatorId;
+  const canUnclaim = isAdmin || isMod || isAssignee;
+
+  // Allowed returns `undefined` when the role/admin check passes. The
+  // assignee-only unclaim rule still lives in `applyTicketAction`; here we
+  // only check the "can this role touch this button at all" question.
+  const denialMessage = ticketActionDenial(parsed.action, {
+    canClaim,
+    canUnclaim,
+    canResolve,
+    canClose,
+    canReopen,
+  });
+  if (denialMessage) {
+    return ephemeralResponse(denialMessage);
   }
 
   const result = await ctx.runMutation(

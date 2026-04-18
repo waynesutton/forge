@@ -183,6 +183,8 @@ type EditableForm = {
   linkSubmitterOnPublish?: boolean;
   ticketMode?: boolean;
   autoCloseInactiveDays?: number;
+  ticketClaimRoleIds?: Array<string>;
+  ticketResolveRoleIds?: Array<string>;
   published: boolean;
   discordCommandId?: string;
 };
@@ -372,6 +374,16 @@ function FormEditor({ form }: { form: EditableForm }) {
   const [autoCloseInactiveDays, setAutoCloseInactiveDays] = useState<
     number | undefined
   >(form.autoCloseInactiveDays);
+  // Ticket-only role gates. `ticketClaimRoleIds` lets non-mods press Claim
+  // and `ticketResolveRoleIds` lets non-mods press Resolve. Admin + mod +
+  // the submitter rules are applied in `convex/http.ts` and don't need
+  // dedicated pickers here.
+  const [ticketClaimRoleIds, setTicketClaimRoleIds] = useState<Array<string>>(
+    form.ticketClaimRoleIds ?? [],
+  );
+  const [ticketResolveRoleIds, setTicketResolveRoleIds] = useState<Array<string>>(
+    form.ticketResolveRoleIds ?? [],
+  );
   const [fields, setFields] = useState<Array<FormField>>(form.fields);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(
     form.fields[0]?.id ?? null,
@@ -429,6 +441,8 @@ function FormEditor({ form }: { form: EditableForm }) {
     linkSubmitterOnPublish,
     ticketMode,
     autoCloseInactiveDays,
+    ticketClaimRoleIds,
+    ticketResolveRoleIds,
     fields,
   });
   const hasUnsavedChanges = currentSnapshot !== lastSavedSnapshot;
@@ -487,6 +501,10 @@ function FormEditor({ form }: { form: EditableForm }) {
         linkSubmitterOnPublish,
         ticketMode,
         autoCloseInactiveDays,
+        ticketClaimRoleIds:
+          ticketClaimRoleIds.length > 0 ? ticketClaimRoleIds : undefined,
+        ticketResolveRoleIds:
+          ticketResolveRoleIds.length > 0 ? ticketResolveRoleIds : undefined,
       });
       setTitle(updated.title);
       setCommandName(updated.commandName);
@@ -506,6 +524,8 @@ function FormEditor({ form }: { form: EditableForm }) {
       setLinkSubmitterOnPublish(updated.linkSubmitterOnPublish ?? true);
       setTicketMode(updated.ticketMode ?? false);
       setAutoCloseInactiveDays(updated.autoCloseInactiveDays);
+      setTicketClaimRoleIds(updated.ticketClaimRoleIds ?? []);
+      setTicketResolveRoleIds(updated.ticketResolveRoleIds ?? []);
       setFields(updated.fields);
       setSelectedFieldId((current) =>
         updated.fields.some((field) => field.id === current)
@@ -1065,6 +1085,27 @@ function FormEditor({ form }: { form: EditableForm }) {
               </label>
 
               {ticketMode ? (
+                <>
+                <RolePicker
+                  title="Claim role"
+                  description="Members with any selected role can press the Claim button. Admins and moderator roles always can."
+                  roles={guildRoles}
+                  selectedRoleIds={ticketClaimRoleIds}
+                  onToggle={(roleId) =>
+                    toggleRoleSelection(roleId, setTicketClaimRoleIds)
+                  }
+                />
+
+                <RolePicker
+                  title="Resolve role"
+                  description="Members with any selected role can press Resolve. Admins, moderator roles, and the submitter always can."
+                  roles={guildRoles}
+                  selectedRoleIds={ticketResolveRoleIds}
+                  onToggle={(roleId) =>
+                    toggleRoleSelection(roleId, setTicketResolveRoleIds)
+                  }
+                />
+
                 <label className="flex items-start gap-3 rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4">
                   <span className="flex flex-col gap-1">
                     <span className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-ink)]">
@@ -1102,6 +1143,7 @@ function FormEditor({ form }: { form: EditableForm }) {
                     </span>
                   </span>
                 </label>
+                </>
               ) : null}
 
               <div className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
@@ -2524,6 +2566,8 @@ function createDraftSnapshot(form: {
   linkSubmitterOnPublish?: boolean;
   ticketMode?: boolean;
   autoCloseInactiveDays?: number;
+  ticketClaimRoleIds?: Array<string>;
+  ticketResolveRoleIds?: Array<string>;
   fields: Array<FormField>;
 }) {
   return JSON.stringify({
@@ -2546,6 +2590,8 @@ function createDraftSnapshot(form: {
     linkSubmitterOnPublish: form.linkSubmitterOnPublish ?? true,
     ticketMode: form.ticketMode ?? false,
     autoCloseInactiveDays: form.autoCloseInactiveDays ?? null,
+    ticketClaimRoleIds: form.ticketClaimRoleIds ?? [],
+    ticketResolveRoleIds: form.ticketResolveRoleIds ?? [],
     fields: form.fields,
   });
 }

@@ -142,6 +142,12 @@ export default defineSchema({
     // Days of inactivity before the cron auto-closes a ticket. Only
     // honored when `ticketMode` is on. Undefined or 0 disables auto close.
     autoCloseInactiveDays: v.optional(v.number()),
+    // Extra Discord role ids that can press Claim / Resolve beyond the
+    // built-in admin + mod gate. Empty or undefined means only admins and
+    // `modRoleIds` can press those buttons. The submitter can always press
+    // Resolve and Close on their own ticket; that rule lives in `http.ts`.
+    ticketClaimRoleIds: v.optional(v.array(v.string())),
+    ticketResolveRoleIds: v.optional(v.array(v.string())),
     published: v.boolean(),
     discordCommandId: v.optional(v.string()),
   }).index("by_guildid_and_commandname", ["guildId", "commandName"]),

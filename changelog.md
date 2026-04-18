@@ -4,6 +4,31 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Developer marketing intro in `README.md`. Opening section now explains who Forge is for, what it replaces, and the stack tradeoffs (Convex-only deployment, type-safe end to end, reactive subscriptions, Ed25519 verify) so the README doubles as the pitch used for SEO previews.
+- SEO metadata in `index.html`. Adds a longer `<title>`, richer `<meta name="description">`, `keywords`, `theme-color`, full Open Graph tags (`og:type`, `og:title`, `og:description`, `og:image`, `og:site_name`), Twitter summary card tags, `robots`, and an Apple touch icon fallback.
+- Project favicon at `public/favicon.svg`. Rounded beige square with a 1px border and an orange lightning bolt in the accent color (`#f54e00`) that matches the in-app Lightning icon.
+- Feature grid on `/auth/sign-in`. `src/components/auth/SignIn.tsx` now renders a second card below the sign-in surface labeled "Inside Forge" with eight icon + label rows aimed at developers: visual form builder, one-click slash commands, mod queue approvals, ticket mode, per form audit log, CSV and PDF export, private fields stay private, and reply from the dashboard. Same window-chrome styling and accent color as the rest of the app.
+
+### Changed
+
+- Moved the sign-in card toward the top of the viewport. `src/components/auth/SignIn.tsx` switched from vertically centered to top-aligned with `pt-12 sm:pt-16`, and inner card padding tightened from `py-10` to `py-8` so the card and feature grid both fit above the fold on a laptop.
+- Replaced the terms of use footnote on `/auth/sign-in` with "For Convex by Convex." The screen is an internal tool; the new line reflects that without implying an external TOS.
+- Simplified the `/auth/denied` copy in `src/pages/AccessDenied.tsx`. Removed the paragraph about GitHub primary email and workspace invites; the screen now reads a single line: "Forge is limited to Convex team accounts." The cached email chip and "Try another account" link stay.
+
+### Added
+
+- Wrote a real `README.md` covering what Forge does, feature list, stack, getting started, scripts, access model, and links to project docs. Flipped the `README.md` row in `files.md` from `planned` to `live`.
+
+### Changed
+
+- Removed third-party brand references from design tokens and docs. Design token comments, file docs, task list, and PRDs now describe the aesthetic in Forge's own terms. Touched `src/styles/index.css`, `files.md`, `TASK.md`, `prds/forge-prd_1.md`, and `prds/access-control.md`.
+
+### Added
+
+- Ticket mode role gates. Admins can now set two new role lists per form: **Claim role** (`forms.ticketClaimRoleIds`) and **Resolve role** (`forms.ticketResolveRoleIds`). Members with a claim role can press the Claim button without being a mod; members with a resolve role can press Resolve. The submitter can press Resolve and Close on their own ticket. Admins (Discord Administrator permission) and members in `modRoleIds` keep access to every button. Reopen stays admin + mod only. The assignee rule for Unclaim still lives in `applyTicketAction`. `convex/schema.ts`, `convex/forms.ts`, `convex/submissions.ts` (route context), `convex/http.ts` (new `hasAdministratorPermission` and `ticketActionDenial` helpers replacing the old single mod-role gate in `handleTicketButton`), and `src/pages/EditForm.tsx` (two RolePicker blocks inside the ticket mode panel) share the wiring.
+
 ### Fixed
 
 - Email fields now honor the "private by default" label shown in the field type picker. `convex/discord.ts:buildSubmissionEmbed` gained an `audience` parameter (`mod_queue` or `destination`); `publishSubmissionImpl` and `updatePublishedTicketMessage` pass `destination`, which strips fields whose type matches the new `isPrivateFieldType` allow-list (currently just `email`). Mod queue posts and the dashboard still show the full answer set so moderators can contact the submitter, but the public destination channel no longer leaks email addresses.
@@ -121,7 +146,7 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 
 ### Pre-existing (not changed today)
 
-- Vite + React 19 + Tailwind v4 project scaffold: `index.html`, `vite.config.ts`, `tsconfig.{json,app,node}.json`, `src/main.tsx`, `src/App.tsx`, `src/styles/index.css` with PostHog-inspired `@theme` tokens.
+- Vite + React 19 + Tailwind v4 project scaffold: `index.html`, `vite.config.ts`, `tsconfig.{json,app,node}.json`, `src/main.tsx`, `src/App.tsx`, `src/styles/index.css` with Forge `@theme` tokens.
 - Convex backend scaffold: `convex/convex.config.ts` registers `@robelest/convex-auth` and `@convex-dev/static-hosting`; `convex/schema.ts` implements the full PRD data model; `convex/http.ts` wires `auth.http.add`, Discord `/interactions` with Ed25519 verify + PING response, and `registerStaticRoutes`.
 - Robel auth bootstrap in `convex/auth.ts`: `createAuth(components.auth, { providers: [github(...)] })` using the first-party provider factory.
 - Static-hosting internal API in `convex/staticHosting.ts`: `generateUploadUrl`, `recordAsset`, `gcOldAssets`, `listAssets`, `getCurrentDeployment`.

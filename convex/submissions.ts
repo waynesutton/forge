@@ -398,6 +398,8 @@ const routeContextValidator = v.object({
     linkSubmitterOnPublish: v.optional(v.boolean()),
     ticketMode: v.optional(v.boolean()),
     autoCloseInactiveDays: v.optional(v.number()),
+    ticketClaimRoleIds: v.optional(v.array(v.string())),
+    ticketResolveRoleIds: v.optional(v.array(v.string())),
     fields: v.array(
       v.object({
         id: v.string(),
@@ -485,6 +487,8 @@ export const routeContext = internalQuery({
         linkSubmitterOnPublish: form.linkSubmitterOnPublish,
         ticketMode: form.ticketMode,
         autoCloseInactiveDays: form.autoCloseInactiveDays,
+        ticketClaimRoleIds: form.ticketClaimRoleIds,
+        ticketResolveRoleIds: form.ticketResolveRoleIds,
         fields: form.fields.map((field) => ({
           id: field.id,
           label: field.label,

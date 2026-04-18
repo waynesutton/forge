@@ -86,10 +86,6 @@ export function Dashboard() {
 
       <section className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-[var(--shadow-window)]">
         <h2 className="text-lg font-semibold">You are signed in</h2>
-        <p className="mt-2 max-w-xl text-sm text-[var(--color-muted)]">
-          Phase 1 is complete. Phase 2 is under way: connect a Discord server
-          in Settings, then build forms. The mod queue lands in Phase 3.
-        </p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <Link
             to="/app/forms"

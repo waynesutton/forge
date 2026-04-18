@@ -89,6 +89,8 @@ const editableFormValidator = v.object({
   linkSubmitterOnPublish: v.optional(v.boolean()),
   ticketMode: v.optional(v.boolean()),
   autoCloseInactiveDays: v.optional(v.number()),
+  ticketClaimRoleIds: v.optional(v.array(v.string())),
+  ticketResolveRoleIds: v.optional(v.array(v.string())),
   published: v.boolean(),
   discordCommandId: v.optional(v.string()),
 });
@@ -221,6 +223,8 @@ export const update = mutation({
     linkSubmitterOnPublish: v.optional(v.boolean()),
     ticketMode: v.optional(v.boolean()),
     autoCloseInactiveDays: v.optional(v.number()),
+    ticketClaimRoleIds: v.optional(v.array(v.string())),
+    ticketResolveRoleIds: v.optional(v.array(v.string())),
   },
   returns: editableFormValidator,
   handler: async (ctx, args) => {
@@ -239,6 +243,11 @@ export const update = mutation({
     const requiredRoleIds = normalizeRoleIds(args.requiredRoleIds);
     const restrictedRoleIds = normalizeRoleIds(args.restrictedRoleIds);
     const modRoleIds = normalizeRoleIds(args.modRoleIds);
+    // Ticket-mode role gates extend beyond mods. Only meaningful when
+    // ticketMode is on, but we still normalize regardless so toggling the
+    // mode off then on doesn't lose the selection.
+    const ticketClaimRoleIds = normalizeRoleIds(args.ticketClaimRoleIds);
+    const ticketResolveRoleIds = normalizeRoleIds(args.ticketResolveRoleIds);
     const successMessage = normalizeSuccessMessage(args.successMessage);
     const maxSubmissionsPerUser = normalizeOptionalPositiveInt(
       args.maxSubmissionsPerUser,
@@ -288,6 +297,16 @@ export const update = mutation({
       "restricted_role_invalid",
     );
     validateRoleSelection(roleById, modRoleIds, "mod_role_invalid");
+    validateRoleSelection(
+      roleById,
+      ticketClaimRoleIds,
+      "ticket_claim_role_invalid",
+    );
+    validateRoleSelection(
+      roleById,
+      ticketResolveRoleIds,
+      "ticket_resolve_role_invalid",
+    );
     const publishConfigChanged =
       existing.title !== title ||
       existing.commandName !== commandName ||
@@ -333,6 +352,8 @@ export const update = mutation({
       linkSubmitterOnPublish: args.linkSubmitterOnPublish,
       ticketMode: args.ticketMode,
       autoCloseInactiveDays,
+      ticketClaimRoleIds,
+      ticketResolveRoleIds,
       titleTemplate: nextTitleTemplate,
       published: publishConfigChanged ? false : existing.published,
     });
@@ -926,6 +947,8 @@ function toEditableForm(row: Doc<"forms">) {
     linkSubmitterOnPublish: row.linkSubmitterOnPublish,
     ticketMode: row.ticketMode,
     autoCloseInactiveDays: row.autoCloseInactiveDays,
+    ticketClaimRoleIds: row.ticketClaimRoleIds,
+    ticketResolveRoleIds: row.ticketResolveRoleIds,
     published: row.published,
     discordCommandId: row.discordCommandId,
   };

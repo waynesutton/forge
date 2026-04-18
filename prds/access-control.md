@@ -35,7 +35,7 @@ Email comparison is case-insensitive and uses `.toLowerCase().endsWith("@convex.
   - Unauthenticated → redirect to `/auth/sign-in`.
   - Authenticated + `!access.allowed` → redirect to `/auth/denied` (preserving `Outlet` semantics).
   - Authenticated + allowed + `me === null` → spinner while upsert lands.
-- New page `src/pages/AccessDenied.tsx`: PostHog-style window chrome, email echoed back, sign-out button, short note about who to contact.
+- New page `src/pages/AccessDenied.tsx`: window chrome, email echoed back, sign-out button, short note about who to contact.
 - Router: add `/auth/denied` above the `<Protected />` group.
 
 ### Edge cases
