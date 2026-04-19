@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router";
 import {
   ArrowUpRight,
+  CaretDown,
   ChatCircleText,
   CheckSquare,
   ClipboardText,
@@ -470,7 +471,9 @@ function DarkPoint({ title, body }: { title: string; body: string }) {
 }
 
 // Exhaustive feature list as a typographic index. No cards, just a dense
-// editorial table of everything Forge ships.
+// editorial table of everything Forge ships. The grid + legend are collapsed
+// behind a native <details> element so the page reads lean on first load and
+// the long reference list is one click away for anyone doing diligence.
 function FeatureIndex() {
   return (
     <section className="border-y border-[var(--color-border)] bg-[var(--color-surface)]">
@@ -490,87 +493,118 @@ function FeatureIndex() {
           </p>
         </div>
 
-        <div className="grid gap-16 lg:grid-cols-2 lg:gap-x-24">
-          <FeatureGroup
-            icon={<Hammer size={18} weight="bold" />}
-            label="Build"
-            items={[
-              "Visual form builder with live Discord modal preview",
-              "Eight field types: short, paragraph, email, code, select, yes or no, checkbox, number",
-              "Per field helper text, placeholder, required toggle, min and max length",
-              "Option validation for select, yes or no, and checkbox fields",
-              "Min, max, and currency unit label on number fields",
-              "Code fields render as copyable code blocks in Discord embeds",
-              "Email fields marked private by default",
-            ]}
-          />
-          <FeatureGroup
-            icon={<PaperPlaneTilt size={18} weight="bold" />}
-            label="Publish"
-            items={[
-              "One click slash command registration per form",
-              "Update the live command from the editor at any time",
-              "Publish destination can be a text channel or a forum thread",
-              "Forum thread titles templated with `{fieldId}` interpolation",
-              "Optional applied forum tag per form",
-              "Optional submitter handle pill on every published post",
-              "Moderator name in embed footer toggle",
-            ]}
-          />
-          <FeatureGroup
-            icon={<CheckSquare size={18} weight="bold" />}
-            label="Moderate"
-            items={[
-              "Mod queue channel with Approve and Deny buttons",
-              "Deny reason modal, capped at 500 characters",
-              "Approve and Deny also available on the results page in the dashboard",
-              "Auto publish path when approval is off",
-              "Per form required, blocked, and moderator role gates",
-              "Role lists sourced live from cached guild roles",
-              "Per user lifetime and per day submission caps",
-              "Custom Discord success message per form",
-            ]}
-          />
-          <FeatureGroup
-            icon={<Ticket size={18} weight="bold" />}
-            label="Ticket mode"
-            items={[
-              "Turn any form into a support or bounty request workflow",
-              "Lifecycle buttons for Claim, Unclaim, Resolve, Reopen, and Close",
-              "Optional claim role and resolve role gates per form",
-              "Assignee name and status rendered inside the embed footer",
-              "Auto close inactive tickets after a configurable number of days",
-              "Forum threads archive and unarchive on close and reopen",
-            ]}
-          />
-          <FeatureGroup
-            icon={<ListChecks size={18} weight="bold" />}
-            label="Review"
-            items={[
-              "Per form results page with submitter, values, status, and timestamps",
-              "Hide and Unhide rows without touching Discord",
-              "Delete rows with an optional Discord message cleanup checkbox",
-              "Reply in Discord composer that posts as the bot with no pings",
-              "CSV export with quoting, option labels, and formatted numbers",
-              "PDF export paginated with field labels, timestamps, and deny reasons",
-              "Field level copy buttons across every value",
-            ]}
-          />
-          <FeatureGroup
-            icon={<ClipboardText size={18} weight="bold" />}
-            label="Observe"
-            items={[
-              "Per form audit log with every submission, decision, and ticket action",
-              "Success and error rows with severity filtering",
-              "Plain English translations for known Discord REST error codes",
-              "Expandable metadata panel with a one click copy button",
-              "Hourly cron sweep that closes stale tickets automatically",
-              "Real time dashboard updates over Convex subscriptions",
-            ]}
-          />
-        </div>
+        <details className="group flex flex-col gap-12">
+          <summary
+            className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-5 py-4 text-left text-base font-medium text-[var(--color-ink)] transition-colors outline-none [&::-webkit-details-marker]:hidden hover:border-[var(--color-ink)] focus-visible:ring-2 focus-visible:ring-[var(--color-ink)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)] sm:px-6 sm:py-5"
+            aria-label="Toggle full feature list">
+            <span className="flex items-center gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-accent)]">
+                <ListChecks size={16} weight="bold" aria-hidden />
+              </span>
+              <span className="flex flex-col">
+                <span className="text-base font-semibold tracking-tight">
+                  Show the full feature list
+                </span>
+                <span className="text-xs text-[var(--color-muted)] group-open:hidden">
+                  Six groups, every shipping capability
+                </span>
+                <span className="hidden text-xs text-[var(--color-muted)] group-open:inline">
+                  Click to collapse
+                </span>
+              </span>
+            </span>
+            <CaretDown
+              size={18}
+              weight="bold"
+              aria-hidden
+              className="shrink-0 text-[var(--color-muted)] transition-transform duration-200 group-open:rotate-180 group-open:text-[var(--color-ink)]"
+            />
+          </summary>
 
-        <FeatureLegend />
+          <div className="flex flex-col gap-12 pt-4">
+            <div className="grid gap-16 lg:grid-cols-2 lg:gap-x-24">
+              <FeatureGroup
+                icon={<Hammer size={18} weight="bold" />}
+                label="Build"
+                items={[
+                  "Visual form builder with live Discord modal preview",
+                  "Eight field types: short, paragraph, email, code, select, yes or no, checkbox, number",
+                  "Per field helper text, placeholder, required toggle, min and max length",
+                  "Option validation for select, yes or no, and checkbox fields",
+                  "Min, max, and currency unit label on number fields",
+                  "Code fields render as copyable code blocks in Discord embeds",
+                  "Email fields marked private by default",
+                ]}
+              />
+              <FeatureGroup
+                icon={<PaperPlaneTilt size={18} weight="bold" />}
+                label="Publish"
+                items={[
+                  "One click slash command registration per form",
+                  "Update the live command from the editor at any time",
+                  "Publish destination can be a text channel or a forum thread",
+                  "Forum thread titles templated with `{fieldId}` interpolation",
+                  "Optional applied forum tag per form",
+                  "Optional submitter handle pill on every published post",
+                  "Moderator name in embed footer toggle",
+                ]}
+              />
+              <FeatureGroup
+                icon={<CheckSquare size={18} weight="bold" />}
+                label="Moderate"
+                items={[
+                  "Mod queue channel with Approve and Deny buttons",
+                  "Deny reason modal, capped at 500 characters",
+                  "Approve and Deny also available on the results page in the dashboard",
+                  "Auto publish path when approval is off",
+                  "Per form required, blocked, and moderator role gates",
+                  "Role lists sourced live from cached guild roles",
+                  "Per user lifetime and per day submission caps",
+                  "Custom Discord success message per form",
+                ]}
+              />
+              <FeatureGroup
+                icon={<Ticket size={18} weight="bold" />}
+                label="Ticket mode"
+                items={[
+                  "Turn any form into a support or bounty request workflow",
+                  "Lifecycle buttons for Claim, Unclaim, Resolve, Reopen, and Close",
+                  "Optional claim role and resolve role gates per form",
+                  "Assignee name and status rendered inside the embed footer",
+                  "Auto close inactive tickets after a configurable number of days",
+                  "Forum threads archive and unarchive on close and reopen",
+                ]}
+              />
+              <FeatureGroup
+                icon={<ListChecks size={18} weight="bold" />}
+                label="Review"
+                items={[
+                  "Per form results page with submitter, values, status, and timestamps",
+                  "Hide and Unhide rows without touching Discord",
+                  "Delete rows with an optional Discord message cleanup checkbox",
+                  "Reply in Discord composer that posts as the bot with no pings",
+                  "CSV export with quoting, option labels, and formatted numbers",
+                  "PDF export paginated with field labels, timestamps, and deny reasons",
+                  "Field level copy buttons across every value",
+                ]}
+              />
+              <FeatureGroup
+                icon={<ClipboardText size={18} weight="bold" />}
+                label="Observe"
+                items={[
+                  "Per form audit log with every submission, decision, and ticket action",
+                  "Success and error rows with severity filtering",
+                  "Plain English translations for known Discord REST error codes",
+                  "Expandable metadata panel with a one click copy button",
+                  "Hourly cron sweep that closes stale tickets automatically",
+                  "Real time dashboard updates over Convex subscriptions",
+                ]}
+              />
+            </div>
+
+            <FeatureLegend />
+          </div>
+        </details>
       </div>
     </section>
   );

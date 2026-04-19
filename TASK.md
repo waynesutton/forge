@@ -106,6 +106,16 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 
 ## Completed
 
+### 2026-04-19 07:08 UTC — Collapse the /about feature list behind a toggle
+
+- Wrapped the `FeatureIndex` body (the six `FeatureGroup` cards plus the trailing `FeatureLegend`) in `src/pages/About.tsx` in a native `<details>` element that starts closed so the page reads lean on first paint.
+- Built a styled `<summary>` that looks and behaves like a real button: bordered pill with `ListChecks` badge on the left, stacked title plus helper text, and a `CaretDown` chevron on the right that rotates 180deg on open through Tailwind's `group-open:rotate-180` variant. Hid the default disclosure marker via `[&::-webkit-details-marker]:hidden` and `list-none`, and preserved keyboard affordance with a `focus-visible:ring-2` treatment.
+- Helper copy swaps between "Six groups, every shipping capability" (closed) and "Click to collapse" (open) using `group-open:hidden` / `hidden group-open:inline`, so the trigger always states the current action.
+- Kept the eyebrow ("Every feature"), the h2 ("The whole feature list."), and the intro paragraph visible above the toggle so nothing about what is behind the fold is guessed.
+- Added `CaretDown` to the `@phosphor-icons/react` import list.
+- Verified with `ReadLints` on `src/pages/About.tsx` (clean).
+- Files touched: `src/pages/About.tsx`, `changelog.md`, `TASK.md`, `files.md`.
+
 ### 2026-04-19 06:50 UTC — Docs note for forks on search engine indexing
 
 - Added a new "Search engine indexing" section to `docs/setup-guide.md` and a mirrored `indexing` section under the Deploy category in `src/pages/Docs.tsx` so anyone forking the repo sees the robots default at the moment they are deploying.

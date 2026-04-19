@@ -4,6 +4,16 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 
 ## [Unreleased]
 
+## 2026-04-19 07:08 UTC
+
+### Changed
+
+- The "Every feature / The whole feature list." section on `/about` now collapses behind a native `<details>` toggle and is closed by default. (2026-04-19 07:08 UTC) In `src/pages/About.tsx` the eyebrow, headline, and intro paragraph stay visible so anyone scrolling understands what is behind the toggle, but the six-group feature grid and the `FeatureLegend` row now sit inside a styled `<summary>` + body pair. The summary reads as a real button (border, hover state, `focus-visible` ring, Phosphor `ListChecks` badge, `CaretDown` chevron that rotates `180deg` when open via Tailwind's `group-open:` variant) and swaps its helper text between "Six groups, every shipping capability" and "Click to collapse" using `group-open:hidden` / `group-open:inline`. Trades a very long editorial scroll for a cleaner first paint while keeping every feature one click away. Added a `CaretDown` import from `@phosphor-icons/react`.
+
+### Verification
+
+- `ReadLints` on `src/pages/About.tsx` clean.
+
 ## 2026-04-19 06:50 UTC
 
 ### Added
