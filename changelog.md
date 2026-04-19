@@ -4,6 +4,18 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 
 ## [Unreleased]
 
+## 2026-04-19 06:50 UTC
+
+### Added
+
+- New "Search engine indexing" section in `docs/setup-guide.md` and a mirrored `indexing` section under the Deploy category in `src/pages/Docs.tsx`. (2026-04-19 06:50 UTC) Tells forkers that the bundled `index.html` ships `noindex, nofollow` on both `robots` and `googlebot` meta tags because the upstream deployment is an internal Convex admin tool, shows the exact two meta lines in `index.html`, and gives two ways to flip indexing on (delete the tags, or set both `content` attributes to `index, follow`). Calls out that `index.html` applies to the whole SPA so one bundle cannot `noindex` `/app` while indexing `/about`. Reminds forkers to set `og:url`, swap `public/forge-og-image.png`, and edit the `ABOUT_OG_TITLE`, `ABOUT_OG_DESCRIPTION`, and `OG_IMAGE_ALT` constants in `src/pages/About.tsx` before they go public.
+- Added a "Search engine indexing" entry to the on-disk guide's `## Contents` list.
+
+### Verification
+
+- `npx tsc --noEmit -p tsconfig.app.json` clean.
+- `ReadLints` on `docs/setup-guide.md` and `src/pages/Docs.tsx` clean.
+
 ## 2026-04-19 06:31 UTC
 
 ### Added

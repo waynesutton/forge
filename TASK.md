@@ -106,6 +106,14 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 
 ## Completed
 
+### 2026-04-19 06:50 UTC — Docs note for forks on search engine indexing
+
+- Added a new "Search engine indexing" section to `docs/setup-guide.md` and a mirrored `indexing` section under the Deploy category in `src/pages/Docs.tsx` so anyone forking the repo sees the robots default at the moment they are deploying.
+- The section shows the exact two lines in `index.html` (`<meta name="robots" content="noindex, nofollow" />` and `<meta name="googlebot" content="noindex, nofollow" />`), explains why the upstream instance ships them (internal Convex admin tool, not a public product site), and documents the two ways a fork can flip it on (delete both tags or change `content` to `index, follow`). Adds a warning that `index.html` covers the whole SPA so `/app` and `/about` cannot take different robots directives from one bundle, plus reminders to set `og:url`, swap `public/forge-og-image.png`, and edit the `ABOUT_OG_TITLE` / `ABOUT_OG_DESCRIPTION` / `OG_IMAGE_ALT` constants in `src/pages/About.tsx` before going public.
+- Added a "Search engine indexing" line to the on-disk guide's `## Contents` list so the table of contents stays in sync.
+- Verified with `npx tsc --noEmit -p tsconfig.app.json` (clean) and `ReadLints` on both files (clean).
+- Files touched: `docs/setup-guide.md`, `src/pages/Docs.tsx`, `files.md`, `changelog.md`, `TASK.md`.
+
 ### 2026-04-19 06:31 UTC — Large social card image for / and /about
 
 - Added `public/forge-og-image.png` (3024x1634) as the canonical social card for every share surface. Wired it into `index.html` by swapping `og:image` and `twitter:image` off `/favicon.svg` and onto `/forge-og-image.png`, upgrading `twitter:card` from `summary` to `summary_large_image`, and adding `og:image:type`, `og:image:width`, `og:image:height`, `og:image:alt`, and `twitter:image:alt`.

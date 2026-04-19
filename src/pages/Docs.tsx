@@ -597,6 +597,47 @@ After the first successful run, your prod Convex site URL serves the app. Sign i
 Wire \`<UpdateBanner>\` from \`@convex-dev/static-hosting/react\` against the \`getCurrentDeployment\` query to show a refresh prompt when a newer deployment lands.`,
   },
   {
+    slug: "indexing",
+    category: "Deploy",
+    label: "Search indexing",
+    title: "Search engine indexing for forks",
+    summary: "Forks default to noindex. Here is how to flip it on.",
+    markdown: `## Search engine indexing for forks
+
+Heads up for forks: out of the box this repo tells search engines and AI crawlers to leave the site alone. The two lines in \`index.html\` that do this are:
+
+\`\`\`html
+<meta name="robots" content="noindex, nofollow" />
+<meta name="googlebot" content="noindex, nofollow" />
+\`\`\`
+
+Why it ships this way: the upstream hosted instance is an internal Convex tool, not a public product page, so the bundled \`index.html\` defaults to \`noindex, nofollow\` to keep the admin app out of Google, Bing, and the major AI crawlers.
+
+**Turn indexing on**
+
+If you are forking Forge to run a public site (for example, you are pointing a custom domain at your Convex deployment and want \`/about\` to rank), open \`index.html\` and do one of the following:
+
+- Simplest fix: delete both \`<meta name="robots">\` and \`<meta name="googlebot">\` lines. The absence of a robots meta is equivalent to \`index, follow\`.
+- More explicit: change the content attributes to \`index, follow\` on both lines.
+
+\`\`\`html
+<meta name="robots" content="index, follow" />
+<meta name="googlebot" content="index, follow" />
+\`\`\`
+
+After the change, redeploy with \`npm run deploy\` so the new \`index.html\` lands in static hosting. Then drop your prod URL into Google Search Console and Bing Webmaster Tools and request indexing.
+
+**One bundle, one directive**
+
+\`index.html\` applies to the entire SPA, so you cannot \`noindex\` \`/app\` while indexing \`/about\` from the same bundle. If you want to keep the admin app private but let the marketing page rank, put the public \`/about\` on its own host, not behind the same admin sign-in.
+
+**Related knobs worth checking before you go public**
+
+- \`og:url\` in \`index.html\` is not set. Add one pointing at your prod domain so shared links resolve canonically.
+- The social card at \`public/forge-og-image.png\` is used for every share surface. Swap it for your own brand before you ship.
+- \`src/pages/About.tsx\` patches OG and Twitter meta at runtime, so update the \`ABOUT_OG_TITLE\`, \`ABOUT_OG_DESCRIPTION\`, and \`OG_IMAGE_ALT\` constants at the top of that file to say what you want to say.`,
+  },
+  {
     slug: "troubleshooting",
     category: "Reference",
     label: "Troubleshooting",
@@ -828,14 +869,6 @@ export function Docs() {
                     </ul>
                   </div>
                 ))}
-
-                <div className="px-2 pt-2 text-xs text-[var(--color-muted)]">
-                  Canonical markdown lives at{" "}
-                  <code className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-1 py-0.5 text-[11px]">
-                    docs/setup-guide.md
-                  </code>
-                  .
-                </div>
               </nav>
             </div>
           </aside>

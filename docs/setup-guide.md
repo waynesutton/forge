@@ -22,6 +22,7 @@ Forge is a self-hostable Discord form builder and approval engine. You design fo
 - Environment variables
 - Go from localhost to production
 - Deploy to production on Convex static hosting
+- Search engine indexing
 - In-app docs section
 - Troubleshooting
 - References
@@ -522,6 +523,37 @@ npm run deploy
 After the first successful run, your prod Convex site URL serves the app. Open it, sign in, and connect a prod Discord server against the prod Discord application.
 
 Live reload on deploy: the app can show an update banner whenever a newer deployment lands. Wire `<UpdateBanner>` from `@convex-dev/static-hosting/react` against the `getCurrentDeployment` query for that.
+
+## Search engine indexing
+
+Heads up for forks: out of the box this repo tells search engines and AI crawlers to leave the site alone. The two lines in `index.html` that do this are:
+
+```html
+<meta name="robots" content="noindex, nofollow" />
+<meta name="googlebot" content="noindex, nofollow" />
+```
+
+Why it ships this way: the upstream hosted instance is an internal Convex tool, not a public product page, so the bundled `index.html` defaults to `noindex, nofollow` to keep the admin app out of Google, Bing, and the major AI crawlers.
+
+If you are forking Forge to run a public marketing site (for example, you are pointing a custom domain at your Convex deployment and want `/about` to rank), open `index.html` and do one of the following:
+
+- Simplest fix: delete both `<meta name="robots">` and `<meta name="googlebot">` lines. The absence of a robots meta is equivalent to `index, follow`.
+- More explicit: change the content attributes to `index, follow` on both lines.
+
+```html
+<meta name="robots" content="index, follow" />
+<meta name="googlebot" content="index, follow" />
+```
+
+After you change it, redeploy with `npm run deploy` so the new `index.html` lands in static hosting. Then drop your prod URL into Google Search Console and Bing Webmaster Tools and request indexing.
+
+If you want to keep the admin app private but let the marketing page rank, the cleanest path is to put the public `/about` on its own host, not behind the same admin sign-in. `index.html` applies to the entire SPA, so you cannot `noindex` `/app` while indexing `/about` from one bundle.
+
+A couple of related knobs to check before you go public:
+
+- `og:url` in `index.html` is not set. Add one pointing at your prod domain so shared links resolve canonically.
+- The social card at `public/forge-og-image.png` is used for every share surface. Swap it for your own brand before you ship.
+- `src/pages/About.tsx` patches OG and Twitter meta at runtime, so make sure the `ABOUT_OG_TITLE`, `ABOUT_OG_DESCRIPTION`, and `OG_IMAGE_ALT` constants at the top of that file say what you want to say.
 
 ## In-app docs section
 
