@@ -4,6 +4,18 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 
 ## [Unreleased]
 
+## 2026-04-20 02:00 UTC
+
+### Changed
+
+- Both "Fork the repo" CTAs on `/about` now read "Check out the repo" and link at the repo root. (2026-04-20 02:00 UTC) In `src/pages/About.tsx` the hero primary button and the closing `CtaSection` button both point at `https://github.com/waynesutton/forge-for-discord` instead of the `/fork` deep link, and the Phosphor icon swapped from `GitFork` to `GithubLogo` to match the new label. The inline "fork the repo" link inside `InternalAppNotice` also reads "check out the repo" now and targets the same URL, so every repo link on the page behaves the same way: land on the GitHub page, decide from there.
+- Retired the `REPO_FORK_URL` constant and removed the `GitFork` icon import since neither has a caller any more. Source of truth for repo links on the About page is now a single `REPO_URL` constant.
+
+### Verification
+
+- `npx tsc --noEmit -p tsconfig.app.json` clean.
+- `ReadLints` on `src/pages/About.tsx` clean.
+
 ## 2026-04-19 07:08 UTC
 
 ### Changed

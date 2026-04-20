@@ -12,7 +12,6 @@ import {
   Envelope,
   Export,
   FileText,
-  GitFork,
   GithubLogo,
   Hash,
   Hammer,
@@ -40,7 +39,6 @@ const ABOUT_OG_DESCRIPTION =
   "Self-hostable Discord form builder and approval engine. Design forms in a browser, publish them as slash commands, route submissions through a mod queue, and ship approved answers to any text or forum channel.";
 
 const REPO_URL = "https://github.com/waynesutton/forge-for-discord";
-const REPO_FORK_URL = `${REPO_URL}/fork`;
 const PHOSPHOR_URL = "https://phosphoricons.com/";
 const CONVEX_URL = "https://www.convex.dev";
 const CONVEX_STATIC_HOSTING_URL = "https://www.convex.dev/components/static-hosting";
@@ -226,12 +224,12 @@ function HeroSection() {
           </p>
           <div className="flex flex-col justify-end gap-3">
             <a
-              href={REPO_FORK_URL}
+              href={REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex w-fit items-center gap-2 rounded-[var(--radius-window)] border border-[var(--color-ink)] bg-[var(--color-ink)] px-5 py-3 text-sm font-medium text-[var(--color-surface)] shadow-[var(--shadow-window)] transition-transform duration-150 active:translate-y-px">
-              <GitFork size={16} weight="bold" aria-hidden />
-              Fork the repo
+              <GithubLogo size={16} weight="bold" aria-hidden />
+              Check out the repo
               <ArrowUpRight size={16} weight="bold" />
             </a>
             <Link
@@ -277,11 +275,11 @@ function InternalAppNotice() {
           Sign in on this deployment is locked to the Convex team and will not work for anyone else.
           To run Forge on your own Discord server,{" "}
           <a
-            href={REPO_FORK_URL}
+            href={REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium text-[var(--color-ink)] underline decoration-[var(--color-accent)] underline-offset-4 transition-colors hover:decoration-[var(--color-ink)]">
-            fork the repo
+            check out the repo
           </a>{" "}
           and follow the{" "}
           <Link
@@ -824,12 +822,12 @@ function CtaSection() {
 
         <div className="flex flex-wrap items-center gap-4">
           <a
-            href={REPO_FORK_URL}
+            href={REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-2 rounded-[var(--radius-window)] border border-[var(--color-ink)] bg-[var(--color-ink)] px-6 py-4 text-base font-medium text-[var(--color-surface)] shadow-[var(--shadow-window)] transition-transform duration-150 active:translate-y-px">
-            <GitFork size={18} weight="bold" aria-hidden />
-            Fork the repo
+            <GithubLogo size={18} weight="bold" aria-hidden />
+            Check out the repo
             <ArrowUpRight size={18} weight="bold" />
           </a>
           <Link

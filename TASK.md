@@ -106,6 +106,14 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 
 ## Completed
 
+### 2026-04-20 02:00 UTC — About CTAs point at the repo root, not the fork deep link
+
+- Swapped both "Fork the repo" CTAs on `src/pages/About.tsx` (hero plus closing `CtaSection`) to "Check out the repo" and re-pointed the `href` at `https://github.com/waynesutton/forge-for-discord` instead of the `/fork` deep link. Icon switched from Phosphor `GitFork` to `GithubLogo` to match the new label.
+- Updated the `InternalAppNotice` body copy so the inline link reads "check out the repo" and also targets `REPO_URL`. The surrounding sentence still tells the reader to run Forge on their own Discord server and follow the setup guide, so the instructional flow is intact without forcing the reader straight into a GitHub fork modal.
+- Removed the `REPO_FORK_URL = ${REPO_URL}/fork` constant at the top of the file and dropped `GitFork` from the `@phosphor-icons/react` import since nothing references either any more.
+- Verified with `npx tsc --noEmit -p tsconfig.app.json` (clean) and `ReadLints` on `src/pages/About.tsx` (clean).
+- Files touched: `src/pages/About.tsx`, `files.md`, `changelog.md`, `TASK.md`.
+
 ### 2026-04-19 07:08 UTC — Collapse the /about feature list behind a toggle
 
 - Wrapped the `FeatureIndex` body (the six `FeatureGroup` cards plus the trailing `FeatureLegend`) in `src/pages/About.tsx` in a native `<details>` element that starts closed so the page reads lean on first paint.
