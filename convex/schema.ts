@@ -29,6 +29,7 @@ export default defineSchema({
     defaultForumTagId: v.optional(v.string()),
     lastChannelsSyncAt: v.optional(v.number()),
     lastRolesSyncAt: v.optional(v.number()),
+    plainApiKey: v.optional(v.string()),
   })
     .index("by_discordguildid", ["discordGuildId"])
     .index("by_installedbyuserid", ["installedByUserId"]),
@@ -112,9 +113,16 @@ export default defineSchema({
     ),
     requiresApproval: v.boolean(),
     modQueueChannelId: v.optional(v.string()),
+    // Final destination after submit or approval. Undefined means "discord"
+    // so existing forms keep today's destination publish behavior.
+    destination: v.optional(
+      v.union(v.literal("discord"), v.literal("plain"), v.literal("both")),
+    ),
     destinationChannelId: v.optional(v.string()),
     destinationType: v.optional(v.union(v.literal("text"), v.literal("forum"))),
     forumTagId: v.optional(v.string()),
+    plainLabelIds: v.optional(v.array(v.string())),
+    plainSubmitDmMessage: v.optional(v.string()),
     titleSource: v.union(v.literal("static"), v.literal("field")),
     titleTemplate: v.optional(v.string()),
     titleFieldId: v.optional(v.string()),
@@ -173,6 +181,8 @@ export default defineSchema({
     modQueueChannelId: v.optional(v.string()),
     publishedMessageId: v.optional(v.string()),
     publishedThreadId: v.optional(v.string()),
+    plainThreadId: v.optional(v.string()),
+    plainCustomerId: v.optional(v.string()),
     decidedBy: v.optional(v.string()),
     decidedAt: v.optional(v.number()),
     denyReason: v.optional(v.string()),

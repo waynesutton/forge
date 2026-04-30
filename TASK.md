@@ -106,6 +106,17 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 
 ## Completed
 
+### 2026-04-30 18:00 UTC — Plain API integration for Forge
+
+- Added `prds/plain-integration.md` covering scope, routing behavior, edge cases, and verification steps.
+- Added optional Plain destination fields to guilds, forms, and submissions, plus server-only Plain API key storage and public safe `plainConfigured` status.
+- Added `convex/plain.ts` with Plain GraphQL customer upsert, thread creation, connection testing, submitter DM, and audit logging through existing submission helpers.
+- Updated routing so final destinations can be Discord, Plain, or both. Plain only skips the Discord destination post.
+- Updated Settings, the form editor, and results pages for Plain key setup, destination selection, Plain options, and View in Plain links.
+- Updated `.env.example`, `files.md`, and `changelog.md`.
+- Verified with `npx convex codegen`, `npx tsc --noEmit -p convex/tsconfig.json`, `npx tsc --noEmit -p tsconfig.app.json`, targeted `npx eslint`, `ReadLints`, and `npx convex-doctor@latest` (90/100 Healthy, known warning profile).
+- Files touched: `convex/schema.ts`, `convex/guilds.ts`, `convex/forms.ts`, `convex/submissions.ts`, `convex/discord.ts`, `convex/plain.ts`, `src/pages/Settings.tsx`, `src/pages/EditForm.tsx`, `src/pages/FormResults.tsx`, `prds/plain-integration.md`, `.env.example`, `files.md`, `changelog.md`, `TASK.md`.
+
 ### 2026-04-20 02:00 UTC — About CTAs point at the repo root, not the fork deep link
 
 - Swapped both "Fork the repo" CTAs on `src/pages/About.tsx` (hero plus closing `CtaSection`) to "Check out the repo" and re-pointed the `href` at `https://github.com/waynesutton/forge-for-discord` instead of the `/fork` deep link. Icon switched from Phosphor `GitFork` to `GithubLogo` to match the new label.

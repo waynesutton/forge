@@ -47,6 +47,7 @@ const submissionSummaryValidator = v.object({
   assignedToUserName: v.optional(v.string()),
   assignedAt: v.optional(v.number()),
   lastActivityAt: v.optional(v.number()),
+  plainThreadId: v.optional(v.string()),
 });
 
 export const listForForm = query({
@@ -91,6 +92,7 @@ export const listForForm = query({
       assignedToUserName: row.assignedToUserName,
       assignedAt: row.assignedAt,
       lastActivityAt: row.lastActivityAt,
+      plainThreadId: row.plainThreadId,
     }));
   },
 });
@@ -307,6 +309,8 @@ export const insertFromDiscord = internalMutation({
       modQueueChannelId: undefined,
       publishedMessageId: undefined,
       publishedThreadId: undefined,
+      plainThreadId: undefined,
+      plainCustomerId: undefined,
       decidedBy: undefined,
       decidedAt: undefined,
       denyReason: undefined,
@@ -365,6 +369,8 @@ const routeContextValidator = v.object({
     modQueueChannelId: v.optional(v.string()),
     publishedMessageId: v.optional(v.string()),
     publishedThreadId: v.optional(v.string()),
+    plainThreadId: v.optional(v.string()),
+    plainCustomerId: v.optional(v.string()),
     decidedBy: v.optional(v.string()),
     decidedAt: v.optional(v.number()),
     denyReason: v.optional(v.string()),
@@ -387,9 +393,14 @@ const routeContextValidator = v.object({
     description: v.optional(v.string()),
     requiresApproval: v.boolean(),
     modQueueChannelId: v.optional(v.string()),
+    destination: v.optional(
+      v.union(v.literal("discord"), v.literal("plain"), v.literal("both")),
+    ),
     destinationChannelId: v.optional(v.string()),
     destinationType: v.optional(v.union(v.literal("text"), v.literal("forum"))),
     forumTagId: v.optional(v.string()),
+    plainLabelIds: v.optional(v.array(v.string())),
+    plainSubmitDmMessage: v.optional(v.string()),
     titleSource: v.union(v.literal("static"), v.literal("field")),
     titleTemplate: v.optional(v.string()),
     titleFieldId: v.optional(v.string()),
@@ -461,6 +472,8 @@ export const routeContext = internalQuery({
         modQueueChannelId: submission.modQueueChannelId,
         publishedMessageId: submission.publishedMessageId,
         publishedThreadId: submission.publishedThreadId,
+        plainThreadId: submission.plainThreadId,
+        plainCustomerId: submission.plainCustomerId,
         decidedBy: submission.decidedBy,
         decidedAt: submission.decidedAt,
         denyReason: submission.denyReason,
@@ -476,9 +489,12 @@ export const routeContext = internalQuery({
         description: form.description,
         requiresApproval: form.requiresApproval,
         modQueueChannelId: form.modQueueChannelId,
+        destination: form.destination,
         destinationChannelId: form.destinationChannelId,
         destinationType: form.destinationType,
         forumTagId: form.forumTagId,
+        plainLabelIds: form.plainLabelIds,
+        plainSubmitDmMessage: form.plainSubmitDmMessage,
         titleSource: form.titleSource,
         titleTemplate: form.titleTemplate,
         titleFieldId: form.titleFieldId,
@@ -561,6 +577,37 @@ export const markPublished = internalMutation({
       metadata: {
         messageId: args.messageId,
         threadId: args.threadId,
+      },
+    });
+    return null;
+  },
+});
+
+export const markPlainCreated = internalMutation({
+  args: {
+    submissionId: v.id("submissions"),
+    plainThreadId: v.string(),
+    plainCustomerId: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const submission = await ctx.db.get("submissions", args.submissionId);
+    if (!submission) return null;
+    if (submission.plainThreadId === args.plainThreadId) return null;
+
+    await ctx.db.patch("submissions", args.submissionId, {
+      plainThreadId: args.plainThreadId,
+      plainCustomerId: args.plainCustomerId,
+    });
+    await ctx.db.insert("auditLog", {
+      guildId: submission.guildId,
+      actorId: "system",
+      action: "plain_thread_created",
+      submissionId: args.submissionId,
+      formId: submission.formId,
+      metadata: {
+        plainThreadId: args.plainThreadId,
+        plainCustomerId: args.plainCustomerId,
       },
     });
     return null;

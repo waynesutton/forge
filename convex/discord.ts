@@ -24,6 +24,7 @@ import {
   type ActionCtx,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import { requireAllowedViewer } from "./lib/auth";
 
 const DISCORD_AUTHORIZE_URL = "https://discord.com/api/oauth2/authorize";
@@ -563,14 +564,85 @@ const EMBED_COLOR_PENDING = 0x5865f2;
 const EMBED_COLOR_APPROVED = 0x3ba55d;
 const EMBED_COLOR_DENIED = 0xed4245;
 
-type RouteContext = NonNullable<
-  Awaited<ReturnType<typeof fetchRouteContext>>
->;
+type RouteField = {
+  id: string;
+  label: string;
+  type:
+    | "short"
+    | "paragraph"
+    | "email"
+    | "code"
+    | "select"
+    | "yes_no"
+    | "checkbox"
+    | "number";
+  minValue?: number;
+  maxValue?: number;
+  currencyUnit?: string;
+  options?: Array<{ id: string; label: string }>;
+};
+
+type RouteContext = {
+  submission: {
+    _id: Id<"submissions">;
+    _creationTime: number;
+    guildId: Id<"guilds">;
+    formId: Id<"forms">;
+    submitterId: string;
+    submitterName: string;
+    values: Record<string, string>;
+    status: "pending" | "approved" | "denied" | "auto_published";
+    modQueueMessageId?: string;
+    modQueueChannelId?: string;
+    publishedMessageId?: string;
+    publishedThreadId?: string;
+    plainThreadId?: string;
+    plainCustomerId?: string;
+    decidedBy?: string;
+    decidedAt?: number;
+    denyReason?: string;
+    ticketStatus?: TicketLifecycleStatus;
+    assignedToUserId?: string;
+    assignedToUserName?: string;
+    assignedAt?: number;
+    lastActivityAt?: number;
+  };
+  form: {
+    _id: Id<"forms">;
+    title: string;
+    description?: string;
+    requiresApproval: boolean;
+    modQueueChannelId?: string;
+    destination?: "discord" | "plain" | "both";
+    destinationChannelId?: string;
+    destinationType?: "text" | "forum";
+    forumTagId?: string;
+    plainLabelIds?: Array<string>;
+    plainSubmitDmMessage?: string;
+    titleSource: "static" | "field";
+    titleTemplate?: string;
+    titleFieldId?: string;
+    modRoleIds?: Array<string>;
+    showModeratorInFooter?: boolean;
+    linkSubmitterOnPublish?: boolean;
+    ticketMode?: boolean;
+    autoCloseInactiveDays?: number;
+    ticketClaimRoleIds?: Array<string>;
+    ticketResolveRoleIds?: Array<string>;
+    fields: Array<RouteField>;
+  };
+  guild: {
+    _id: Id<"guilds">;
+    discordGuildId: string;
+    applicationId: string;
+    botToken: string;
+  };
+};
 
 async function fetchRouteContext(
   ctx: ActionCtx,
-  submissionId: import("./_generated/dataModel").Id<"submissions">,
-) {
+  submissionId: Id<"submissions">,
+): Promise<RouteContext | null> {
   return ctx.runQuery(internal.submissions.routeContext, { submissionId });
 }
 
@@ -598,7 +670,7 @@ export const routeSubmission = internalAction({
       return null;
     }
 
-    await publishSubmissionImpl(ctx, context);
+    await routeFinalDestination(ctx, context);
     return null;
   },
 });
@@ -661,10 +733,22 @@ export const publishSubmission = internalAction({
   handler: async (ctx, args) => {
     const context = await fetchRouteContext(ctx, args.submissionId);
     if (!context) return null;
-    await publishSubmissionImpl(ctx, context);
+    await routeFinalDestination(ctx, context);
     return null;
   },
 });
+
+async function routeFinalDestination(ctx: ActionCtx, context: RouteContext) {
+  const destination = context.form.destination ?? "discord";
+  if (destination === "discord" || destination === "both") {
+    await publishSubmissionImpl(ctx, context);
+  }
+  if (destination === "plain" || destination === "both") {
+    await ctx.scheduler.runAfter(0, internal.plain.createPlainThread, {
+      submissionId: context.submission._id,
+    });
+  }
+}
 
 // Scheduled from `recordDecision` on approve and deny. Opens a DM channel
 // with the submitter and posts a short status message. Silently audits when

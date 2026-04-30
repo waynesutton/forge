@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowLeft,
+  ArrowSquareOut,
   CheckCircle,
   ChatCircle,
   CircleNotch,
@@ -463,6 +464,17 @@ function SubmissionCard({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={submission.status} />
+          {submission.plainThreadId ? (
+            <a
+              href={plainThreadUrl(submission.plainThreadId)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 text-xs font-medium text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)]"
+            >
+              <ArrowSquareOut size={14} weight="bold" aria-hidden />
+              <span>View in Plain</span>
+            </a>
+          ) : null}
           {form.requiresApproval && submission.status === "pending" ? (
             <>
               <RowAction
@@ -1043,6 +1055,10 @@ function formatTimestamp(timestamp: number) {
     hour: "numeric",
     minute: "2-digit",
   }).format(timestamp);
+}
+
+function plainThreadUrl(threadId: string) {
+  return `https://app.plain.com/thread/${encodeURIComponent(threadId)}`;
 }
 
 // Render a stored numeric answer with thousands grouping and the optional

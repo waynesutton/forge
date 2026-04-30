@@ -57,6 +57,9 @@ const formSummaryValidator = v.object({
   commandDescription: v.string(),
   requiresApproval: v.boolean(),
   published: v.boolean(),
+  destination: v.optional(
+    v.union(v.literal("discord"), v.literal("plain"), v.literal("both")),
+  ),
   destinationType: v.optional(v.union(v.literal("text"), v.literal("forum"))),
   fieldCount: v.number(),
 });
@@ -72,9 +75,14 @@ const editableFormValidator = v.object({
   fields: v.array(formFieldValidator),
   requiresApproval: v.boolean(),
   modQueueChannelId: v.optional(v.string()),
+  destination: v.optional(
+    v.union(v.literal("discord"), v.literal("plain"), v.literal("both")),
+  ),
   destinationChannelId: v.optional(v.string()),
   destinationType: v.optional(v.union(v.literal("text"), v.literal("forum"))),
   forumTagId: v.optional(v.string()),
+  plainLabelIds: v.optional(v.array(v.string())),
+  plainSubmitDmMessage: v.optional(v.string()),
   titleSource: v.union(v.literal("static"), v.literal("field")),
   titleTemplate: v.optional(v.string()),
   titleFieldId: v.optional(v.string()),
@@ -210,9 +218,14 @@ export const update = mutation({
     requiresApproval: v.boolean(),
     fields: v.array(formFieldValidator),
     modQueueChannelId: v.optional(v.string()),
+    destination: v.optional(
+      v.union(v.literal("discord"), v.literal("plain"), v.literal("both")),
+    ),
     destinationChannelId: v.optional(v.string()),
     destinationType: v.optional(v.union(v.literal("text"), v.literal("forum"))),
     forumTagId: v.optional(v.string()),
+    plainLabelIds: v.optional(v.array(v.string())),
+    plainSubmitDmMessage: v.optional(v.string()),
     requiredRoleIds: v.optional(v.array(v.string())),
     restrictedRoleIds: v.optional(v.array(v.string())),
     modRoleIds: v.optional(v.array(v.string())),
@@ -240,6 +253,11 @@ export const update = mutation({
     const commandDescription = normalizeDescription(args.commandDescription);
     const description = normalizeOptionalLongText(args.description);
     const fields = normalizeFields(args.fields);
+    const destination = normalizeDestination(args.destination);
+    const plainLabelIds = normalizePlainLabelIds(args.plainLabelIds);
+    const plainSubmitDmMessage = normalizePlainSubmitDmMessage(
+      args.plainSubmitDmMessage,
+    );
     const requiredRoleIds = normalizeRoleIds(args.requiredRoleIds);
     const restrictedRoleIds = normalizeRoleIds(args.restrictedRoleIds);
     const modRoleIds = normalizeRoleIds(args.modRoleIds);
@@ -284,12 +302,25 @@ export const update = mutation({
       args.modQueueChannelId,
       "mod_queue_channel_invalid",
     );
-    validateDestinationSelection(
-      channelById,
-      args.destinationChannelId,
-      args.destinationType,
-      args.forumTagId,
-    );
+    if (destinationIncludesDiscord(destination)) {
+      validateDestinationSelection(
+        channelById,
+        args.destinationChannelId,
+        args.destinationType,
+        args.forumTagId,
+      );
+    } else if (args.forumTagId) {
+      throw new ConvexError({ code: "forum_tag_requires_discord_destination" });
+    }
+    if (destinationIncludesPlain(destination)) {
+      const guild = await ctx.db.get("guilds", existing.guildId);
+      if (!guild?.plainApiKey) {
+        throw new ConvexError({ code: "plain_api_key_required" });
+      }
+      if (!fields.some((field) => field.type === "email")) {
+        throw new ConvexError({ code: "plain_requires_email_field" });
+      }
+    }
     validateRoleSelection(roleById, requiredRoleIds, "required_role_invalid");
     validateRoleSelection(
       roleById,
@@ -339,9 +370,12 @@ export const update = mutation({
       requiresApproval: args.requiresApproval,
       fields,
       modQueueChannelId: args.modQueueChannelId,
+      destination,
       destinationChannelId: args.destinationChannelId,
       destinationType: args.destinationType,
       forumTagId: args.forumTagId,
+      plainLabelIds,
+      plainSubmitDmMessage,
       requiredRoleIds,
       restrictedRoleIds,
       modRoleIds,
@@ -892,6 +926,59 @@ function normalizeRoleIds(roleIds: Array<string> | undefined) {
   return unique.length > 0 ? unique : undefined;
 }
 
+function normalizeDestination(
+  destination: "discord" | "plain" | "both" | undefined,
+) {
+  return destination;
+}
+
+function destinationIncludesDiscord(
+  destination: "discord" | "plain" | "both" | undefined,
+) {
+  return destination === undefined || destination === "discord" || destination === "both";
+}
+
+function destinationIncludesPlain(
+  destination: "discord" | "plain" | "both" | undefined,
+) {
+  return destination === "plain" || destination === "both";
+}
+
+function normalizePlainLabelIds(labelIds: Array<string> | undefined) {
+  if (!labelIds || labelIds.length === 0) {
+    return undefined;
+  }
+
+  const unique = Array.from(
+    new Set(
+      labelIds
+        .map((labelId) => labelId.trim())
+        .filter((labelId) => labelId.length > 0),
+    ),
+  );
+  if (unique.length === 0) return undefined;
+  if (unique.length > 20) {
+    throw new ConvexError({ code: "plain_labels_too_many", max: 20 });
+  }
+  for (const labelId of unique) {
+    if (labelId.length > 128) {
+      throw new ConvexError({ code: "plain_label_id_too_long", max: 128 });
+    }
+  }
+  return unique;
+}
+
+function normalizePlainSubmitDmMessage(input: string | undefined) {
+  const value = input?.trim();
+  if (!value) {
+    return undefined;
+  }
+  if (value.length > 1000) {
+    throw new ConvexError({ code: "plain_submit_dm_too_long", max: 1000 });
+  }
+  return value;
+}
+
 function normalizeSuccessMessage(input: string | undefined) {
   const value = input?.trim();
   if (!value) {
@@ -1002,6 +1089,7 @@ function toFormSummary(row: Doc<"forms">) {
     requiresApproval: row.requiresApproval,
     published: row.published,
     destinationType: row.destinationType,
+    destination: row.destination,
     fieldCount: row.fields.length,
   };
 }
@@ -1018,9 +1106,12 @@ function toEditableForm(row: Doc<"forms">) {
     fields: row.fields,
     requiresApproval: row.requiresApproval,
     modQueueChannelId: row.modQueueChannelId,
+    destination: row.destination,
     destinationChannelId: row.destinationChannelId,
     destinationType: row.destinationType,
     forumTagId: row.forumTagId,
+    plainLabelIds: row.plainLabelIds,
+    plainSubmitDmMessage: row.plainSubmitDmMessage,
     titleSource: row.titleSource,
     titleTemplate: row.titleTemplate,
     titleFieldId: row.titleFieldId,

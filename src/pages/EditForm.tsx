@@ -76,6 +76,8 @@ type FormField = {
   options?: Array<FieldOption>;
 };
 
+type SubmissionDestination = "discord" | "plain" | "both";
+
 // UI-facing metadata for each field type. Used by the field type picker,
 // the field row label, and the preview rail so the three surfaces stay in
 // sync. Keep the order of this array stable - it drives the picker order.
@@ -171,9 +173,12 @@ type EditableForm = {
   fields: FormField[];
   requiresApproval: boolean;
   modQueueChannelId?: string;
+  destination?: SubmissionDestination;
   destinationChannelId?: string;
   destinationType?: "text" | "forum";
   forumTagId?: string;
+  plainLabelIds?: Array<string>;
+  plainSubmitDmMessage?: string;
   requiredRoleIds?: Array<string>;
   restrictedRoleIds?: Array<string>;
   modRoleIds?: Array<string>;
@@ -324,6 +329,9 @@ function FormEditor({ form }: { form: EditableForm }) {
   const guildChannels =
     useQuery(api.guilds.listChannels, { guildId: form.guildId }) ?? [];
   const guildRoles = useQuery(api.guilds.listRoles, { guildId: form.guildId }) ?? [];
+  const guilds = useQuery(api.guilds.list) ?? [];
+  const connectedGuild = guilds.find((guild) => guild._id === form.guildId);
+  const plainConfigured = connectedGuild?.plainConfigured ?? false;
 
   const [title, setTitle] = useState(form.title);
   const [commandName, setCommandName] = useState(form.commandName);
@@ -332,6 +340,9 @@ function FormEditor({ form }: { form: EditableForm }) {
   );
   const [description, setDescription] = useState(form.description ?? "");
   const [requiresApproval, setRequiresApproval] = useState(form.requiresApproval);
+  const [destination, setDestination] = useState<SubmissionDestination>(
+    form.destination ?? "discord",
+  );
   const [modQueueChannelId, setModQueueChannelId] = useState(
     form.modQueueChannelId ?? "",
   );
@@ -342,6 +353,12 @@ function FormEditor({ form }: { form: EditableForm }) {
     form.destinationChannelId ?? "",
   );
   const [forumTagId, setForumTagId] = useState(form.forumTagId ?? "");
+  const [plainLabelIdsText, setPlainLabelIdsText] = useState(
+    (form.plainLabelIds ?? []).join(", "),
+  );
+  const [plainSubmitDmMessage, setPlainSubmitDmMessage] = useState(
+    form.plainSubmitDmMessage ?? "",
+  );
   const [requiredRoleIds, setRequiredRoleIds] = useState<Array<string>>(
     form.requiredRoleIds ?? [],
   );
@@ -421,6 +438,9 @@ function FormEditor({ form }: { form: EditableForm }) {
   );
   const destinationChannels =
     destinationType === "forum" ? forumChannels : textChannels;
+  const usesDiscordDestination =
+    destination === "discord" || destination === "both";
+  const usesPlainDestination = destination === "plain" || destination === "both";
   const selectedDestinationChannel =
     destinationChannels.find(
       (channel) => channel.discordChannelId === destinationChannelId,
@@ -432,9 +452,12 @@ function FormEditor({ form }: { form: EditableForm }) {
     description,
     requiresApproval,
     modQueueChannelId,
+    destination,
     destinationChannelId,
     destinationType: destinationType || undefined,
     forumTagId,
+    plainLabelIds: parsePlainLabelIds(plainLabelIdsText),
+    plainSubmitDmMessage,
     requiredRoleIds,
     restrictedRoleIds,
     modRoleIds,
@@ -491,9 +514,18 @@ function FormEditor({ form }: { form: EditableForm }) {
         requiresApproval,
         fields,
         modQueueChannelId: modQueueChannelId || undefined,
-        destinationChannelId: destinationChannelId || undefined,
-        destinationType: destinationType || undefined,
-        forumTagId: forumTagId || undefined,
+        destination,
+        destinationChannelId: usesDiscordDestination
+          ? destinationChannelId || undefined
+          : undefined,
+        destinationType: usesDiscordDestination
+          ? destinationType || undefined
+          : undefined,
+        forumTagId: usesDiscordDestination ? forumTagId || undefined : undefined,
+        plainLabelIds: parsePlainLabelIds(plainLabelIdsText),
+        plainSubmitDmMessage: plainSubmitDmMessage.trim()
+          ? plainSubmitDmMessage
+          : undefined,
         requiredRoleIds: requiredRoleIds.length > 0 ? requiredRoleIds : undefined,
         restrictedRoleIds:
           restrictedRoleIds.length > 0 ? restrictedRoleIds : undefined,
@@ -515,9 +547,12 @@ function FormEditor({ form }: { form: EditableForm }) {
       setCommandDescription(updated.commandDescription);
       setDescription(updated.description ?? "");
       setModQueueChannelId(updated.modQueueChannelId ?? "");
+      setDestination(updated.destination ?? "discord");
       setDestinationType(updated.destinationType ?? "");
       setDestinationChannelId(updated.destinationChannelId ?? "");
       setForumTagId(updated.forumTagId ?? "");
+      setPlainLabelIdsText((updated.plainLabelIds ?? []).join(", "));
+      setPlainSubmitDmMessage(updated.plainSubmitDmMessage ?? "");
       setRequiredRoleIds(updated.requiredRoleIds ?? []);
       setRestrictedRoleIds(updated.restrictedRoleIds ?? []);
       setModRoleIds(updated.modRoleIds ?? []);
@@ -1222,12 +1257,103 @@ function FormEditor({ form }: { form: EditableForm }) {
                   </button>
                 </div>
 
-                {guildChannels.length === 0 ? (
+                <div className="mt-4 grid gap-3">
+                  <span className="text-sm font-medium text-[var(--color-ink)]">
+                    Submission destination
+                  </span>
+                  <div className="grid gap-2 md:grid-cols-3">
+                    {(["discord", "plain", "both"] as const).map((option) => {
+                      const disabled =
+                        (option === "plain" || option === "both") &&
+                        !plainConfigured;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => {
+                            if (disabled) return;
+                            setDestination(option);
+                          }}
+                          disabled={disabled}
+                          className={`rounded-[var(--radius-window)] border px-3 py-3 text-left text-sm transition-colors disabled:opacity-50 ${
+                            destination === option
+                              ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-surface)]"
+                              : "border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] text-[var(--color-ink)] hover:border-[var(--color-ink)]"
+                          }`}
+                        >
+                          <span className="block font-medium">
+                            {option === "discord"
+                              ? "Discord"
+                              : option === "plain"
+                                ? "Plain"
+                                : "Both"}
+                          </span>
+                          <span className="mt-1 block text-xs opacity-75">
+                            {option === "discord"
+                              ? "Post to the selected Discord destination."
+                              : option === "plain"
+                                ? "Create a Plain thread only."
+                                : "Create both destination records."}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {!plainConfigured ? (
+                    <p className="text-xs text-[var(--color-muted)]">
+                      Plain destinations unlock after you save a Plain API key in
+                      Settings.
+                    </p>
+                  ) : null}
+                </div>
+
+                {usesPlainDestination ? (
+                  <div className="mt-4 grid gap-4 rounded-[calc(var(--radius-window)-2px)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] p-4">
+                    <label className="flex flex-col gap-2">
+                      <span className="text-sm font-medium text-[var(--color-ink)]">
+                        Plain label type IDs
+                      </span>
+                      <input
+                        value={plainLabelIdsText}
+                        onChange={(event) => setPlainLabelIdsText(event.target.value)}
+                        placeholder="lt_123, lt_456"
+                        className="min-h-12 rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 font-mono text-sm outline-none transition-colors focus:border-[var(--color-ink)]"
+                      />
+                      <span className="text-xs text-[var(--color-muted)]">
+                        Optional. Copy label type IDs from Plain and separate
+                        them with commas.
+                      </span>
+                    </label>
+                    <label className="flex flex-col gap-2">
+                      <span className="text-sm font-medium text-[var(--color-ink)]">
+                        Plain submitter DM
+                      </span>
+                      <textarea
+                        value={plainSubmitDmMessage}
+                        onChange={(event) =>
+                          setPlainSubmitDmMessage(event.target.value)
+                        }
+                        rows={3}
+                        placeholder="Your submission was received and a support thread has been created."
+                        className="min-h-24 rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)]"
+                      />
+                    </label>
+                    {!fields.some((field) => field.type === "email") ? (
+                      <p className="rounded-[var(--radius-window)] border border-[color-mix(in_oklab,var(--color-danger)_35%,var(--color-border))] bg-[var(--color-surface)] px-3 py-2 text-xs text-[var(--color-danger)]">
+                        Plain requires one email field so Forge can create or
+                        update the Plain customer.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {usesDiscordDestination ? (
+                  guildChannels.length === 0 ? (
                   <div className="mt-4 rounded-[calc(var(--radius-window)-2px)] border border-dashed border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-4 text-sm text-[var(--color-muted)]">
                     No channels cached yet. Refresh channels to load text and
                     forum destinations for this server.
                   </div>
-                ) : (
+                  ) : (
                   <div className="mt-4 grid gap-4">
                     <label className="flex flex-col gap-2">
                       <span className="text-sm font-medium text-[var(--color-ink)]">
@@ -1323,6 +1449,12 @@ function FormEditor({ form }: { form: EditableForm }) {
                         </select>
                       </label>
                     ) : null}
+                  </div>
+                  )
+                ) : (
+                  <div className="mt-4 rounded-[calc(var(--radius-window)-2px)] border border-dashed border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-4 text-sm text-[var(--color-muted)]">
+                    Plain only forms do not create a Discord destination post.
+                    The slash command and submitter DM still use Discord.
                   </div>
                 )}
               </div>
@@ -2678,6 +2810,18 @@ function numberOrUndefined(value: string): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
+function parsePlainLabelIds(value: string): Array<string> | undefined {
+  const ids = Array.from(
+    new Set(
+      value
+        .split(",")
+        .map((labelId) => labelId.trim())
+        .filter((labelId) => labelId.length > 0),
+    ),
+  );
+  return ids.length > 0 ? ids : undefined;
+}
+
 function createDraftSnapshot(form: {
   title: string;
   commandName: string;
@@ -2685,9 +2829,12 @@ function createDraftSnapshot(form: {
   description?: string;
   requiresApproval: boolean;
   modQueueChannelId?: string;
+  destination?: SubmissionDestination;
   destinationChannelId?: string;
   destinationType?: "text" | "forum";
   forumTagId?: string;
+  plainLabelIds?: Array<string>;
+  plainSubmitDmMessage?: string;
   requiredRoleIds?: Array<string>;
   restrictedRoleIds?: Array<string>;
   modRoleIds?: Array<string>;
@@ -2709,9 +2856,12 @@ function createDraftSnapshot(form: {
     description: form.description ?? "",
     requiresApproval: form.requiresApproval,
     modQueueChannelId: form.modQueueChannelId ?? "",
+    destination: form.destination ?? "discord",
     destinationChannelId: form.destinationChannelId ?? "",
     destinationType: form.destinationType ?? "",
     forumTagId: form.forumTagId ?? "",
+    plainLabelIds: form.plainLabelIds ?? [],
+    plainSubmitDmMessage: form.plainSubmitDmMessage ?? "",
     requiredRoleIds: form.requiredRoleIds ?? [],
     restrictedRoleIds: form.restrictedRoleIds ?? [],
     modRoleIds: form.modRoleIds ?? [],
@@ -2786,6 +2936,21 @@ function formatFormError(error: unknown): string {
   }
   if (error.message.includes("forum_tag_requires_forum_destination")) {
     return "Forum tags only work with forum destinations.";
+  }
+  if (error.message.includes("forum_tag_requires_discord_destination")) {
+    return "Forum tags only work when Discord is a destination.";
+  }
+  if (error.message.includes("plain_api_key_required")) {
+    return "Save a Plain API key in Settings before choosing Plain for this form.";
+  }
+  if (error.message.includes("plain_requires_email_field")) {
+    return "Plain forms need one email field so Forge can create or update the Plain customer.";
+  }
+  if (error.message.includes("plain_labels_too_many")) {
+    return "Plain label list is too long. Use 20 label type IDs or fewer.";
+  }
+  if (error.message.includes("plain_submit_dm_too_long")) {
+    return "Plain submitter DM is too long. Keep it under 1000 characters.";
   }
   if (error.message.includes("discord_channels_refresh_failed")) {
     return "Discord channel refresh failed. Check the bot install and server permissions.";

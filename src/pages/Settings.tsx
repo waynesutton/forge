@@ -22,6 +22,7 @@ type ConnectedGuild = {
   iconUrl?: string;
   applicationId: string;
   installedByUserId: Id<"users">;
+  plainConfigured: boolean;
 };
 
 // Settings landing page. Phase 2 scope: Discord bot install + installed guild
@@ -41,8 +42,15 @@ export function Settings() {
 
   const guilds = useQuery(api.guilds.list) ?? [];
   const generateInstallUrl = useAction(api.discord.generateInstallUrl);
+  const testPlainConnection = useAction(api.plain.testConnection);
   const disconnectGuild = useMutation(api.guilds.disconnect);
+  const setPlainApiKey = useMutation(api.guilds.setPlainApiKey);
   const [pending, setPending] = useState(false);
+  const [plainInputs, setPlainInputs] = useState<Record<string, string>>({});
+  const [plainSavingGuildId, setPlainSavingGuildId] =
+    useState<Id<"guilds"> | null>(null);
+  const [plainTestingGuildId, setPlainTestingGuildId] =
+    useState<Id<"guilds"> | null>(null);
   const [disconnectingGuildId, setDisconnectingGuildId] =
     useState<Id<"guilds"> | null>(null);
   const [confirmingGuildId, setConfirmingGuildId] = useState<Id<"guilds"> | null>(
@@ -96,6 +104,48 @@ export function Settings() {
       setClientError(formatDisconnectError(err));
     } finally {
       setDisconnectingGuildId(null);
+    }
+  };
+
+  const handleSavePlainKey = async (guild: ConnectedGuild) => {
+    setPlainSavingGuildId(guild._id);
+    setClientError(null);
+    setClientSuccess(null);
+    try {
+      await setPlainApiKey({
+        guildId: guild._id,
+        plainApiKey: plainInputs[guild._id],
+      });
+      setPlainInputs((current) => ({ ...current, [guild._id]: "" }));
+      setClientSuccess(
+        plainInputs[guild._id]?.trim()
+          ? `Plain is configured for ${guild.name}.`
+          : `Plain was cleared for ${guild.name}.`,
+      );
+    } catch (err) {
+      setClientError(formatPlainError(err));
+    } finally {
+      setPlainSavingGuildId(null);
+    }
+  };
+
+  const handleTestPlain = async (guild: ConnectedGuild) => {
+    setPlainTestingGuildId(guild._id);
+    setClientError(null);
+    setClientSuccess(null);
+    try {
+      const result = await testPlainConnection({ guildId: guild._id });
+      if (!result.ok) {
+        setClientError(formatPlainTestError(result.error));
+        return;
+      }
+      setClientSuccess(
+        `Plain connected${result.workspaceName ? ` to ${result.workspaceName}` : ""}.`,
+      );
+    } catch (err) {
+      setClientError(formatPlainError(err));
+    } finally {
+      setPlainTestingGuildId(null);
     }
   };
 
@@ -164,7 +214,7 @@ export function Settings() {
         <Banner
           tone="ok"
           icon={<CheckCircle size={18} weight="fill" />}
-          title="Server disconnected"
+          title="Settings updated"
           description={clientSuccess}
           onDismiss={() => setClientSuccess(null)}
         />
@@ -220,6 +270,17 @@ export function Settings() {
                   busy={pending || disconnectingGuildId !== null}
                   confirmingGuildId={confirmingGuildId}
                   disconnectingGuildId={disconnectingGuildId}
+                  plainInput={plainInputs[guild._id] ?? ""}
+                  plainSavingGuildId={plainSavingGuildId}
+                  plainTestingGuildId={plainTestingGuildId}
+                  onPlainInputChange={(value) =>
+                    setPlainInputs((current) => ({
+                      ...current,
+                      [guild._id]: value,
+                    }))
+                  }
+                  onSavePlain={() => void handleSavePlainKey(guild)}
+                  onTestPlain={() => void handleTestPlain(guild)}
                   onToggleConfirm={() =>
                     setConfirmingGuildId((current) =>
                       current === guild._id ? null : guild._id,
@@ -257,6 +318,12 @@ function GuildRow({
   busy,
   confirmingGuildId,
   disconnectingGuildId,
+  plainInput,
+  plainSavingGuildId,
+  plainTestingGuildId,
+  onPlainInputChange,
+  onSavePlain,
+  onTestPlain,
   onToggleConfirm,
   onCancelConfirm,
   onDisconnect,
@@ -265,6 +332,12 @@ function GuildRow({
   busy: boolean;
   confirmingGuildId: Id<"guilds"> | null;
   disconnectingGuildId: Id<"guilds"> | null;
+  plainInput: string;
+  plainSavingGuildId: Id<"guilds"> | null;
+  plainTestingGuildId: Id<"guilds"> | null;
+  onPlainInputChange: (value: string) => void;
+  onSavePlain: () => void;
+  onTestPlain: () => void;
   onToggleConfirm: () => void;
   onCancelConfirm: () => void;
   onDisconnect: () => void;
@@ -318,6 +391,57 @@ function GuildRow({
         Channels, approval queue, and forum tags are set per form in the
         editor under Command settings.
       </p>
+
+      <div className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-[var(--color-ink)]">
+              Plain support routing
+            </p>
+            <p className="mt-1 max-w-xl text-xs text-[var(--color-muted)]">
+              Save a Plain machine-user API key to let forms create Plain
+              threads instead of, or alongside, Discord destination posts.
+            </p>
+          </div>
+          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-0.5 text-xs text-[var(--color-muted)]">
+            {guild.plainConfigured ? "Configured" : "Not configured"}
+          </span>
+        </div>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            type="password"
+            value={plainInput}
+            onChange={(event) => onPlainInputChange(event.target.value)}
+            placeholder={
+              guild.plainConfigured
+                ? "Enter a new key, or leave blank to clear"
+                : "plainApiKey_..."
+            }
+            className="min-w-0 flex-1 rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 font-mono text-xs text-[var(--color-ink)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-[var(--color-ink)]"
+            autoComplete="off"
+          />
+          <button
+            type="button"
+            onClick={onSavePlain}
+            disabled={busy || plainSavingGuildId !== null}
+            className="rounded-[var(--radius-window)] border border-[var(--color-ink)] bg-[var(--color-ink)] px-3 py-2 text-xs font-medium text-[var(--color-surface)] transition-transform duration-150 active:translate-y-px disabled:opacity-60"
+          >
+            {plainSavingGuildId === guild._id ? "Saving..." : "Save Plain key"}
+          </button>
+          <button
+            type="button"
+            onClick={onTestPlain}
+            disabled={
+              busy ||
+              plainTestingGuildId !== null ||
+              !guild.plainConfigured
+            }
+            className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] disabled:opacity-60"
+          >
+            {plainTestingGuildId === guild._id ? "Testing..." : "Test Plain"}
+          </button>
+        </div>
+      </div>
 
       {confirmingGuildId === guild._id ? (
         <div className="rounded-[var(--radius-window)] border border-[color-mix(in_oklab,var(--color-danger)_35%,var(--color-border))] bg-[var(--color-surface)] px-4 py-3">
@@ -441,5 +565,32 @@ function formatDisconnectError(error: unknown): string {
   }
 
   return error.message;
+}
+
+function formatPlainError(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return "Plain settings could not be saved. Try again in a moment.";
+  }
+  if (error.message.includes("plain_api_key_invalid")) {
+    return "Plain API keys start with plainApiKey_. Paste the machine-user key from Plain.";
+  }
+  if (error.message.includes("guild_not_found")) {
+    return "This server is no longer connected.";
+  }
+  if (error.message.includes("access_denied")) {
+    return "You do not have permission to update Plain settings.";
+  }
+  return error.message;
+}
+
+function formatPlainTestError(code: string | undefined): string {
+  switch (code) {
+    case "plain_api_key_missing":
+      return "Save a Plain API key before testing the connection.";
+    case "workspace_not_found":
+      return "Plain accepted the key, but no workspace was returned.";
+    default:
+      return code ?? "Plain connection test failed.";
+  }
 }
 

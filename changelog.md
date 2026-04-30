@@ -4,6 +4,22 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 
 ## [Unreleased]
 
+### Added
+
+- Plain is now an optional per form destination. Admins can configure a Plain API key per connected Discord server, then choose Discord, Plain, or Both in the form editor. Plain submissions create a Plain customer and thread from the saved Forge form answers, send the submitter a custom Discord DM, write audit rows for success or failure, and show a View in Plain link on the results page. (2026-04-30 18:00 UTC)
+
+### Changed
+
+- Destination routing now treats missing `forms.destination` as Discord for backward compatibility. Plain only forms skip the Discord destination post, while Both schedules Plain thread creation separately from the existing Discord publish path so either side can fail without blocking the other. (2026-04-30 18:00 UTC)
+
+### Verification
+
+- `npx convex codegen` clean.
+- `npx tsc --noEmit -p convex/tsconfig.json` clean.
+- `npx tsc --noEmit -p tsconfig.app.json` clean.
+- `npx eslint convex/schema.ts convex/plain.ts convex/guilds.ts convex/forms.ts convex/submissions.ts convex/discord.ts src/pages/Settings.tsx src/pages/EditForm.tsx src/pages/FormResults.tsx` clean.
+- `npx convex-doctor@latest` completed with score 90/100 Healthy, matching the repo's current known warning profile.
+
 ## 2026-04-20 02:00 UTC
 
 ### Changed

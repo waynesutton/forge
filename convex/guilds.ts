@@ -44,6 +44,7 @@ const publicGuildValidator = v.object({
   defaultForumTagId: v.optional(v.string()),
   lastChannelsSyncAt: v.optional(v.number()),
   lastRolesSyncAt: v.optional(v.number()),
+  plainConfigured: v.boolean(),
 });
 
 const publicChannelValidator = v.object({
@@ -213,6 +214,32 @@ export const updateRoutingDefaults = mutation({
   },
 });
 
+export const setPlainApiKey = mutation({
+  args: {
+    guildId: v.id("guilds"),
+    plainApiKey: v.optional(v.string()),
+  },
+  returns: publicGuildValidator,
+  handler: async (ctx, args) => {
+    await requireAllowedWorkspaceUser(ctx);
+
+    const guild = await ctx.db.get("guilds", args.guildId);
+    if (!guild) {
+      throw new ConvexError({ code: "guild_not_found" });
+    }
+
+    const plainApiKey = normalizePlainApiKey(args.plainApiKey);
+    await ctx.db.patch("guilds", guild._id, { plainApiKey });
+
+    const updated = await ctx.db.get("guilds", guild._id);
+    if (!updated) {
+      throw new ConvexError({ code: "guild_not_found" });
+    }
+
+    return stripSecrets(updated);
+  },
+});
+
 // Admin-facing disconnect path for `/app/settings`. Removes the guild row plus
 // all guild-scoped data that would otherwise point at a dead guild id.
 export const disconnect = mutation({
@@ -291,6 +318,7 @@ export const registerFromInstall = internalMutation({
         defaultForumTagId: existing.defaultForumTagId,
         lastChannelsSyncAt: existing.lastChannelsSyncAt,
         lastRolesSyncAt: existing.lastRolesSyncAt,
+        plainApiKey: existing.plainApiKey,
       });
       return existing._id;
     }
@@ -309,7 +337,18 @@ export const registerFromInstall = internalMutation({
       defaultForumTagId: undefined,
       lastChannelsSyncAt: undefined,
       lastRolesSyncAt: undefined,
+      plainApiKey: undefined,
     });
+  },
+});
+
+export const getPlainApiKey = internalQuery({
+  args: { guildId: v.id("guilds") },
+  returns: v.union(v.null(), v.object({ plainApiKey: v.string() })),
+  handler: async (ctx, args) => {
+    const guild = await ctx.db.get("guilds", args.guildId);
+    if (!guild?.plainApiKey) return null;
+    return { plainApiKey: guild.plainApiKey };
   },
 });
 
@@ -668,6 +707,7 @@ function stripSecrets(row: Doc<"guilds">) {
     defaultForumTagId: row.defaultForumTagId,
     lastChannelsSyncAt: row.lastChannelsSyncAt,
     lastRolesSyncAt: row.lastRolesSyncAt,
+    plainConfigured: Boolean(row.plainApiKey),
   } satisfies {
     _id: Id<"guilds">;
     _creationTime: number;
@@ -682,7 +722,19 @@ function stripSecrets(row: Doc<"guilds">) {
     defaultForumTagId?: string;
     lastChannelsSyncAt?: number;
     lastRolesSyncAt?: number;
+    plainConfigured: boolean;
   };
+}
+
+function normalizePlainApiKey(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  if (!trimmed.startsWith("plainApiKey_")) {
+    throw new ConvexError({ code: "plain_api_key_invalid" });
+  }
+  return trimmed;
 }
 
 function validateTextChannel(
