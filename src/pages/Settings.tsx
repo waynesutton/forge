@@ -51,6 +51,8 @@ export function Settings() {
     useState<Id<"guilds"> | null>(null);
   const [plainTestingGuildId, setPlainTestingGuildId] =
     useState<Id<"guilds"> | null>(null);
+  const [plainCreatingTestThreadGuildId, setPlainCreatingTestThreadGuildId] =
+    useState<Id<"guilds"> | null>(null);
   const [disconnectingGuildId, setDisconnectingGuildId] =
     useState<Id<"guilds"> | null>(null);
   const [confirmingGuildId, setConfirmingGuildId] = useState<Id<"guilds"> | null>(
@@ -146,6 +148,29 @@ export function Settings() {
       setClientError(formatPlainError(err));
     } finally {
       setPlainTestingGuildId(null);
+    }
+  };
+
+  const handleCreatePlainTestThread = async (guild: ConnectedGuild) => {
+    setPlainCreatingTestThreadGuildId(guild._id);
+    setClientError(null);
+    setClientSuccess(null);
+    try {
+      const result = await testPlainConnection({
+        guildId: guild._id,
+        createThread: true,
+      });
+      if (!result.ok || !result.threadId) {
+        setClientError(formatPlainTestError(result.error));
+        return;
+      }
+      setClientSuccess(
+        `Plain test thread created: ${plainThreadUrl(result.threadId)}`,
+      );
+    } catch (err) {
+      setClientError(formatPlainError(err));
+    } finally {
+      setPlainCreatingTestThreadGuildId(null);
     }
   };
 
@@ -273,6 +298,7 @@ export function Settings() {
                   plainInput={plainInputs[guild._id] ?? ""}
                   plainSavingGuildId={plainSavingGuildId}
                   plainTestingGuildId={plainTestingGuildId}
+                  plainCreatingTestThreadGuildId={plainCreatingTestThreadGuildId}
                   onPlainInputChange={(value) =>
                     setPlainInputs((current) => ({
                       ...current,
@@ -281,6 +307,9 @@ export function Settings() {
                   }
                   onSavePlain={() => void handleSavePlainKey(guild)}
                   onTestPlain={() => void handleTestPlain(guild)}
+                  onCreatePlainTestThread={() =>
+                    void handleCreatePlainTestThread(guild)
+                  }
                   onToggleConfirm={() =>
                     setConfirmingGuildId((current) =>
                       current === guild._id ? null : guild._id,
@@ -321,9 +350,11 @@ function GuildRow({
   plainInput,
   plainSavingGuildId,
   plainTestingGuildId,
+  plainCreatingTestThreadGuildId,
   onPlainInputChange,
   onSavePlain,
   onTestPlain,
+  onCreatePlainTestThread,
   onToggleConfirm,
   onCancelConfirm,
   onDisconnect,
@@ -335,9 +366,11 @@ function GuildRow({
   plainInput: string;
   plainSavingGuildId: Id<"guilds"> | null;
   plainTestingGuildId: Id<"guilds"> | null;
+  plainCreatingTestThreadGuildId: Id<"guilds"> | null;
   onPlainInputChange: (value: string) => void;
   onSavePlain: () => void;
   onTestPlain: () => void;
+  onCreatePlainTestThread: () => void;
   onToggleConfirm: () => void;
   onCancelConfirm: () => void;
   onDisconnect: () => void;
@@ -461,6 +494,16 @@ function GuildRow({
               className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] disabled:opacity-60"
             >
               {plainTestingGuildId === guild._id ? "Testing..." : "Test Plain"}
+            </button>
+            <button
+              type="button"
+              onClick={onCreatePlainTestThread}
+              disabled={busy || plainCreatingTestThreadGuildId !== null}
+              className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] disabled:opacity-60"
+            >
+              {plainCreatingTestThreadGuildId === guild._id
+                ? "Creating..."
+                : "Create test thread"}
             </button>
             <button
               type="button"
@@ -617,10 +660,16 @@ function formatPlainTestError(code: string | undefined): string {
   switch (code) {
     case "plain_api_key_missing":
       return "Save a Plain API key before testing the connection.";
+    case "viewer_email_missing":
+      return "Your signed in account needs an email before Forge can create a Plain test customer.";
     case "workspace_not_found":
       return "Plain accepted the key, but no workspace was returned.";
     default:
       return code ?? "Plain connection test failed.";
   }
+}
+
+function plainThreadUrl(threadId: string): string {
+  return `https://app.plain.com/thread/${encodeURIComponent(threadId)}`;
 }
 

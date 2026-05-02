@@ -20,6 +20,8 @@ const ERROR_ACTIONS: ReadonlySet<string> = new Set([
   "archive_thread_failed",
   "post_reply_failed",
   "dm_send_failed",
+  "plain_thread_failed",
+  "plain_dm_failed",
 ]);
 
 const logEntryValidator = v.object({

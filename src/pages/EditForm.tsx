@@ -441,6 +441,7 @@ function FormEditor({ form }: { form: EditableForm }) {
   const usesDiscordDestination =
     destination === "discord" || destination === "both";
   const usesPlainDestination = destination === "plain" || destination === "both";
+  const needsApprovalQueue = requiresApproval;
   const selectedDestinationChannel =
     destinationChannels.find(
       (channel) => channel.discordChannelId === destinationChannelId,
@@ -1347,116 +1348,131 @@ function FormEditor({ form }: { form: EditableForm }) {
                   </div>
                 ) : null}
 
-                {usesDiscordDestination ? (
+                {needsApprovalQueue || usesDiscordDestination ? (
                   guildChannels.length === 0 ? (
-                  <div className="mt-4 rounded-[calc(var(--radius-window)-2px)] border border-dashed border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-4 text-sm text-[var(--color-muted)]">
-                    No channels cached yet. Refresh channels to load text and
-                    forum destinations for this server.
-                  </div>
-                  ) : (
-                  <div className="mt-4 grid gap-4">
-                    <label className="flex flex-col gap-2">
-                      <span className="text-sm font-medium text-[var(--color-ink)]">
-                        Approval queue channel
-                      </span>
-                      <select
-                        value={modQueueChannelId}
-                        onChange={(event) => setModQueueChannelId(event.target.value)}
-                        className="min-h-12 w-full max-w-full rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)]"
-                      >
-                        <option value="">Unset</option>
-                        {textChannels.map((channel) => (
-                          <option
-                            key={channel.discordChannelId}
-                            value={channel.discordChannelId}
-                          >
-                            {formatChannelLabel(channel)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <div className="grid gap-4 md:grid-cols-[12rem_1fr]">
-                      <label className="flex flex-col gap-2">
-                        <span className="text-sm font-medium text-[var(--color-ink)]">
-                          Destination type
-                        </span>
-                        <select
-                          value={destinationType}
-                          onChange={(event) => {
-                            const nextType = event.target.value as
-                              | "text"
-                              | "forum"
-                              | "";
-                            setDestinationType(nextType);
-                            setDestinationChannelId("");
-                            setForumTagId("");
-                          }}
-                          className="min-h-12 w-full max-w-full rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)]"
-                        >
-                          <option value="">Unset</option>
-                          <option value="text">Text</option>
-                          <option value="forum">Forum</option>
-                        </select>
-                      </label>
-
-                      <label className="flex flex-col gap-2">
-                        <span className="text-sm font-medium text-[var(--color-ink)]">
-                          Destination channel
-                        </span>
-                        <select
-                          value={destinationChannelId}
-                          onChange={(event) => {
-                            setDestinationChannelId(event.target.value);
-                            setForumTagId("");
-                          }}
-                          disabled={!destinationType}
-                          className="min-h-12 w-full max-w-full rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)] disabled:opacity-60"
-                        >
-                          <option value="">
-                            {destinationType
-                              ? "Select a destination"
-                              : "Pick a destination type first"}
-                          </option>
-                          {destinationChannels.map((channel) => (
-                            <option
-                              key={channel.discordChannelId}
-                              value={channel.discordChannelId}
-                            >
-                              {formatChannelLabel(channel)}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                    <div className="mt-4 rounded-[calc(var(--radius-window)-2px)] border border-dashed border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-4 text-sm text-[var(--color-muted)]">
+                      No channels cached yet. Refresh channels to load approval
+                      queues and Discord destinations for this server.
                     </div>
+                  ) : (
+                    <div className="mt-4 grid gap-4">
+                      {needsApprovalQueue ? (
+                        <label className="flex flex-col gap-2">
+                          <span className="text-sm font-medium text-[var(--color-ink)]">
+                            Approval queue channel
+                          </span>
+                          <select
+                            value={modQueueChannelId}
+                            onChange={(event) =>
+                              setModQueueChannelId(event.target.value)
+                            }
+                            className="min-h-12 w-full max-w-full rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)]"
+                          >
+                            <option value="">Unset</option>
+                            {textChannels.map((channel) => (
+                              <option
+                                key={channel.discordChannelId}
+                                value={channel.discordChannelId}
+                              >
+                                {formatChannelLabel(channel)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : null}
 
-                    {destinationType === "forum" ? (
-                      <label className="flex flex-col gap-2">
-                        <span className="text-sm font-medium text-[var(--color-ink)]">
-                          Forum tag
-                        </span>
-                        <select
-                          value={forumTagId}
-                          onChange={(event) => setForumTagId(event.target.value)}
-                          className="min-h-12 w-full max-w-full rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)]"
-                        >
-                          <option value="">No tag</option>
-                          {(selectedDestinationChannel?.availableTags ?? []).map((tag) => (
-                            <option key={tag.id} value={tag.id}>
-                              {tag.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    ) : null}
-                  </div>
+                      {usesDiscordDestination ? (
+                        <>
+                          <div className="grid gap-4 md:grid-cols-[12rem_1fr]">
+                            <label className="flex flex-col gap-2">
+                              <span className="text-sm font-medium text-[var(--color-ink)]">
+                                Destination type
+                              </span>
+                              <select
+                                value={destinationType}
+                                onChange={(event) => {
+                                  const nextType = event.target.value as
+                                    | "text"
+                                    | "forum"
+                                    | "";
+                                  setDestinationType(nextType);
+                                  setDestinationChannelId("");
+                                  setForumTagId("");
+                                }}
+                                className="min-h-12 w-full max-w-full rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)]"
+                              >
+                                <option value="">Unset</option>
+                                <option value="text">Text</option>
+                                <option value="forum">Forum</option>
+                              </select>
+                            </label>
+
+                            <label className="flex flex-col gap-2">
+                              <span className="text-sm font-medium text-[var(--color-ink)]">
+                                Destination channel
+                              </span>
+                              <select
+                                value={destinationChannelId}
+                                onChange={(event) => {
+                                  setDestinationChannelId(event.target.value);
+                                  setForumTagId("");
+                                }}
+                                disabled={!destinationType}
+                                className="min-h-12 w-full max-w-full rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)] disabled:opacity-60"
+                              >
+                                <option value="">
+                                  {destinationType
+                                    ? "Select a destination"
+                                    : "Pick a destination type first"}
+                                </option>
+                                {destinationChannels.map((channel) => (
+                                  <option
+                                    key={channel.discordChannelId}
+                                    value={channel.discordChannelId}
+                                  >
+                                    {formatChannelLabel(channel)}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+
+                          {destinationType === "forum" ? (
+                            <label className="flex flex-col gap-2">
+                              <span className="text-sm font-medium text-[var(--color-ink)]">
+                                Forum tag
+                              </span>
+                              <select
+                                value={forumTagId}
+                                onChange={(event) =>
+                                  setForumTagId(event.target.value)
+                                }
+                                className="min-h-12 w-full max-w-full rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink)]"
+                              >
+                                <option value="">No tag</option>
+                                {(
+                                  selectedDestinationChannel?.availableTags ?? []
+                                ).map((tag) => (
+                                  <option key={tag.id} value={tag.id}>
+                                    {tag.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          ) : null}
+                        </>
+                      ) : null}
+                    </div>
                   )
-                ) : (
+                ) : null}
+
+                {!usesDiscordDestination ? (
                   <div className="mt-4 rounded-[calc(var(--radius-window)-2px)] border border-dashed border-[var(--color-border)] bg-[color-mix(in_oklab,var(--color-bg)_70%,white)] px-4 py-4 text-sm text-[var(--color-muted)]">
                     Plain only forms do not create a Discord destination post.
-                    The slash command and submitter DM still use Discord.
+                    The slash command, approval queue, and submitter DM still
+                    use Discord.
                   </div>
-                )}
+                ) : null}
               </div>
 
               <div className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">

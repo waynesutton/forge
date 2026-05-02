@@ -50,6 +50,9 @@ const ACTION_LABELS: Record<string, string> = {
   ticket_auto_close: "Ticket auto closed",
   form_unpublished: "Form unpublished",
   slash_command_unpublished_attempt: "Slash command hit draft form",
+  plain_thread_created: "Plain thread created",
+  plain_thread_failed: "Plain thread failed",
+  plain_dm_failed: "Plain submitter DM failed",
 };
 
 function formatActionLabel(action: string): string {
@@ -181,6 +184,8 @@ function summarize(entry: LogEntry): string {
       return "Posted to the destination channel";
     case "mod_queue_posted":
       return "Posted to the approval queue channel";
+    case "plain_thread_created":
+      return "Created a Plain support thread";
     case "dashboard_reply":
       return "Moderator replied from the dashboard";
     default:

@@ -51,6 +51,8 @@ type PlainKey = { plainApiKey: string } | null;
 type PlainConnectionResult = {
   ok: boolean;
   workspaceName?: string;
+  threadId?: string;
+  customerId?: string;
   error?: string;
 };
 
@@ -78,14 +80,19 @@ type PlainField = {
 };
 
 export const testConnection = action({
-  args: { guildId: v.id("guilds") },
+  args: {
+    guildId: v.id("guilds"),
+    createThread: v.optional(v.boolean()),
+  },
   returns: v.object({
     ok: v.boolean(),
     workspaceName: v.optional(v.string()),
+    threadId: v.optional(v.string()),
+    customerId: v.optional(v.string()),
     error: v.optional(v.string()),
   }),
   handler: async (ctx, args): Promise<PlainConnectionResult> => {
-    await requireAllowedViewer(ctx);
+    const viewer = await requireAllowedViewer(ctx);
     const key: PlainKey = await ctx.runQuery(internal.guilds.getPlainApiKey, {
       guildId: args.guildId,
     });
@@ -100,9 +107,19 @@ export const testConnection = action({
         myWorkspace: { id: string; name: string } | null;
       }>(key.plainApiKey, TEST_CONNECTION_QUERY, {});
       const workspaceName: string | undefined = result.myWorkspace?.name;
-      return workspaceName
-        ? { ok: true, workspaceName }
-        : { ok: false, error: "workspace_not_found" };
+      if (!workspaceName) {
+        return { ok: false, error: "workspace_not_found" };
+      }
+      if (!args.createThread) {
+        return { ok: true, workspaceName };
+      }
+
+      const testThread = await createPlainTestThread(
+        key.plainApiKey,
+        args.guildId,
+        viewer,
+      );
+      return { ok: true, workspaceName, ...testThread };
     } catch (error) {
       return {
         ok: false,
@@ -129,23 +146,35 @@ export const createPlainThread = internalAction({
       guildId: context.submission.guildId,
     });
     if (!key) {
-      await logPlainFailure(ctx, args.submissionId, "plain_api_key_missing");
+      await logPlainFailure(
+        ctx,
+        args.submissionId,
+        "plain_thread_failed",
+        "plain_api_key_missing",
+      );
       return null;
     }
 
     const email = findEmailValue(context.form.fields, context.submission.values);
     if (!email) {
-      await logPlainFailure(ctx, args.submissionId, "plain_email_missing");
+      await logPlainFailure(
+        ctx,
+        args.submissionId,
+        "plain_thread_failed",
+        "plain_email_missing",
+      );
       return null;
     }
 
+    let customerId: string;
+    let threadId: string;
     try {
-      const customerId = await upsertCustomer(key.plainApiKey, {
+      customerId = await upsertCustomer(key.plainApiKey, {
         externalId: context.submission.submitterId,
         fullName: context.submission.submitterName,
         email,
       });
-      const threadId = await createThread(key.plainApiKey, {
+      threadId = await createThread(key.plainApiKey, {
         customerId,
         title: buildThreadTitle(context.form.title, context.submission._id),
         externalId: context.submission._id,
@@ -159,6 +188,17 @@ export const createPlainThread = internalAction({
         plainThreadId: threadId,
         plainCustomerId: customerId,
       });
+    } catch (error) {
+      await logPlainFailure(
+        ctx,
+        args.submissionId,
+        "plain_thread_failed",
+        error instanceof Error ? error.message : "plain_thread_failed",
+      );
+      return null;
+    }
+
+    try {
       await sendPlainSubmitterDm({
         botToken: context.guild.botToken,
         submitterId: context.submission.submitterId,
@@ -169,7 +209,8 @@ export const createPlainThread = internalAction({
       await logPlainFailure(
         ctx,
         args.submissionId,
-        error instanceof Error ? error.message : "plain_thread_failed",
+        "plain_dm_failed",
+        error instanceof Error ? error.message : "plain_dm_failed",
       );
     }
 
@@ -297,6 +338,48 @@ function buildPlainComponents(
   return components;
 }
 
+async function createPlainTestThread(
+  apiKey: string,
+  guildId: Id<"guilds">,
+  viewer: Awaited<ReturnType<typeof requireAllowedViewer>>,
+): Promise<{ threadId: string; customerId: string }> {
+  const email = typeof viewer.email === "string" ? viewer.email : undefined;
+  if (!email) {
+    throw new Error("viewer_email_missing");
+  }
+  const fullName =
+    typeof viewer.name === "string" && viewer.name.trim().length > 0
+      ? viewer.name.trim()
+      : email;
+  const customerId = await upsertCustomer(apiKey, {
+    externalId: `forge-admin-${email}`,
+    fullName,
+    email,
+  });
+  const threadId = await createThread(apiKey, {
+    customerId,
+    title: "Forge Plain test",
+    externalId: `forge-test-${guildId}-${Date.now()}`,
+    description: "Plain test thread created from Forge Settings.",
+    components: buildPlainTestComponents(fullName, email),
+  });
+  return { threadId, customerId };
+}
+
+function buildPlainTestComponents(
+  fullName: string,
+  email: string,
+): Array<PlainComponentInput> {
+  return [
+    { componentText: { text: "**Forge Plain test**" } },
+    {
+      componentPlainText: {
+        plainText: `Created from Forge Settings for ${fullName} (${email}).`,
+      },
+    },
+  ];
+}
+
 function formatFieldValue(field: PlainField, value: string): string {
   if (
     field.type === "select" ||
@@ -377,11 +460,12 @@ async function sendPlainSubmitterDm(args: {
 async function logPlainFailure(
   ctx: ActionCtx,
   submissionId: Id<"submissions">,
+  reason: "plain_thread_failed" | "plain_dm_failed",
   detail: string,
 ): Promise<void> {
   await ctx.runMutation(internal.submissions.logRoutingSkip, {
     submissionId,
-    reason: "plain_thread_failed",
+    reason,
     detail: detail.slice(0, 500),
   });
 }

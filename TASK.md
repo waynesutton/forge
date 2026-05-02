@@ -106,6 +106,15 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 
 ## Completed
 
+### 2026-05-02 20:30 UTC — Plain routing diagnostics and visible test thread
+
+- Added `prds/plain-routing-diagnostics.md` covering the Plain only approval queue bug, hidden Plain error severity, and the difference between checking a Plain key and creating a visible Plain thread.
+- Fixed Plain only plus Requires approval by showing the approval queue channel selector whenever approval is on, while still hiding Discord destination channel and forum controls for Plain only final routing.
+- Updated Plain audit handling so `plain_thread_failed` and `plain_dm_failed` show as errors in form logs, and so Discord DM failure no longer masquerades as Plain thread creation failure after a thread was already created.
+- Extended the existing Plain connection test action with an optional visible test thread path. Settings now has a Create test thread button that creates a Plain customer and thread using the signed in admin email and returns the Plain thread URL in the success banner.
+- Verified with `npx convex codegen`, `npx tsc --noEmit -p convex/tsconfig.json`, `npx tsc --noEmit -p tsconfig.app.json`, targeted `npx eslint`, `ReadLints`, and `npx convex-doctor@latest` (90/100 Healthy, known warning profile).
+- Files touched: `convex/plain.ts`, `convex/auditLog.ts`, `src/pages/FormLogs.tsx`, `src/pages/EditForm.tsx`, `src/pages/Settings.tsx`, `prds/plain-routing-diagnostics.md`, `files.md`, `changelog.md`, `TASK.md`.
+
 ### 2026-04-30 17:18 UTC — Plain Settings UI: collapse input when configured
 
 - Collapsed the Plain API key input on the Settings page when `plainConfigured` is true. The panel now shows a green "Configured" badge, a Test Plain button, and a Change key button. Clicking Change key expands the input and Save/Cancel buttons. Saving or cancelling collapses it back. When no key is saved, the full input renders by default so admins can paste immediately.
