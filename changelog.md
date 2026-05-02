@@ -11,6 +11,7 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 ### Changed
 
 - Destination routing now treats missing `forms.destination` as Discord for backward compatibility. Plain only forms skip the Discord destination post, while Both schedules Plain thread creation separately from the existing Discord publish path so either side can fail without blocking the other. (2026-04-30 18:00 UTC)
+- Settings page Plain panel now collapses the API key input when `plainConfigured` is true. Shows a green "Configured" badge, the Test Plain button, and a Change key button that expands the input on demand. No key saved state still shows the full input by default. (2026-04-30 17:18 UTC)
 
 ### Verification
 

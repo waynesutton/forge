@@ -106,6 +106,12 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 
 ## Completed
 
+### 2026-04-30 17:18 UTC — Plain Settings UI: collapse input when configured
+
+- Collapsed the Plain API key input on the Settings page when `plainConfigured` is true. The panel now shows a green "Configured" badge, a Test Plain button, and a Change key button. Clicking Change key expands the input and Save/Cancel buttons. Saving or cancelling collapses it back. When no key is saved, the full input renders by default so admins can paste immediately.
+- Added local `plainEditing` state to `GuildRow` to control expand/collapse without lifting state.
+- Files touched: `src/pages/Settings.tsx`, `files.md`, `changelog.md`, `TASK.md`.
+
 ### 2026-04-30 18:00 UTC — Plain API integration for Forge
 
 - Added `prds/plain-integration.md` covering scope, routing behavior, edge cases, and verification steps.

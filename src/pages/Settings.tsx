@@ -342,9 +342,8 @@ function GuildRow({
   onCancelConfirm: () => void;
   onDisconnect: () => void;
 }) {
-  // Routing (approval queue, destination channel, forum tag) is configured
-  // per form inside the form editor's Command settings pane. We intentionally
-  // do not mirror those controls here so there is one source of truth.
+  const [plainEditing, setPlainEditing] = useState(false);
+  const showPlainInput = !guild.plainConfigured || plainEditing;
 
   return (
     <li className="flex flex-col gap-4 px-4 py-4">
@@ -399,48 +398,79 @@ function GuildRow({
               Plain support routing
             </p>
             <p className="mt-1 max-w-xl text-xs text-[var(--color-muted)]">
-              Save a Plain machine-user API key to let forms create Plain
-              threads instead of, or alongside, Discord destination posts.
+              {guild.plainConfigured
+                ? "Your Plain API key is active. Forms with Plain routing will create threads automatically."
+                : "Save a Plain machine-user API key to let forms create Plain threads instead of, or alongside, Discord destination posts."}
             </p>
           </div>
-          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-0.5 text-xs text-[var(--color-muted)]">
+          <span
+            className={`rounded-full border px-2 py-0.5 text-xs ${
+              guild.plainConfigured
+                ? "border-[color-mix(in_oklab,var(--color-success)_40%,var(--color-border))] bg-[color-mix(in_oklab,var(--color-success)_8%,var(--color-bg))] text-[var(--color-success,#16a34a)]"
+                : "border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-muted)]"
+            }`}
+          >
             {guild.plainConfigured ? "Configured" : "Not configured"}
           </span>
         </div>
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-          <input
-            type="password"
-            value={plainInput}
-            onChange={(event) => onPlainInputChange(event.target.value)}
-            placeholder={
-              guild.plainConfigured
-                ? "Enter a new key, or leave blank to clear"
-                : "plainApiKey_..."
-            }
-            className="min-w-0 flex-1 rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 font-mono text-xs text-[var(--color-ink)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-[var(--color-ink)]"
-            autoComplete="off"
-          />
-          <button
-            type="button"
-            onClick={onSavePlain}
-            disabled={busy || plainSavingGuildId !== null}
-            className="rounded-[var(--radius-window)] border border-[var(--color-ink)] bg-[var(--color-ink)] px-3 py-2 text-xs font-medium text-[var(--color-surface)] transition-transform duration-150 active:translate-y-px disabled:opacity-60"
-          >
-            {plainSavingGuildId === guild._id ? "Saving..." : "Save Plain key"}
-          </button>
-          <button
-            type="button"
-            onClick={onTestPlain}
-            disabled={
-              busy ||
-              plainTestingGuildId !== null ||
-              !guild.plainConfigured
-            }
-            className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] disabled:opacity-60"
-          >
-            {plainTestingGuildId === guild._id ? "Testing..." : "Test Plain"}
-          </button>
-        </div>
+
+        {showPlainInput ? (
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <input
+              type="password"
+              value={plainInput}
+              onChange={(event) => onPlainInputChange(event.target.value)}
+              placeholder={
+                guild.plainConfigured
+                  ? "Enter a new key, or leave blank to clear"
+                  : "plainApiKey_..."
+              }
+              className="min-w-0 flex-1 rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 font-mono text-xs text-[var(--color-ink)] outline-none transition-colors placeholder:text-[var(--color-muted)] focus:border-[var(--color-ink)]"
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                onSavePlain();
+                setPlainEditing(false);
+              }}
+              disabled={busy || plainSavingGuildId !== null}
+              className="rounded-[var(--radius-window)] border border-[var(--color-ink)] bg-[var(--color-ink)] px-3 py-2 text-xs font-medium text-[var(--color-surface)] transition-transform duration-150 active:translate-y-px disabled:opacity-60"
+            >
+              {plainSavingGuildId === guild._id ? "Saving..." : "Save Plain key"}
+            </button>
+            {guild.plainConfigured ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onPlainInputChange("");
+                  setPlainEditing(false);
+                }}
+                className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)]"
+              >
+                Cancel
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={onTestPlain}
+              disabled={busy || plainTestingGuildId !== null}
+              className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] disabled:opacity-60"
+            >
+              {plainTestingGuildId === guild._id ? "Testing..." : "Test Plain"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setPlainEditing(true)}
+              className="rounded-[var(--radius-window)] border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs font-medium text-[var(--color-muted)] transition-colors hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+            >
+              Change key
+            </button>
+          </div>
+        )}
       </div>
 
       {confirmingGuildId === guild._id ? (
