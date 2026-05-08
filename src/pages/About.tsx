@@ -72,14 +72,24 @@ export function About() {
       key: string;
       value: string;
     }> = [
-      { selector: 'meta[property="og:title"]', attr: "property", key: "og:title", value: ABOUT_OG_TITLE },
+      {
+        selector: 'meta[property="og:title"]',
+        attr: "property",
+        key: "og:title",
+        value: ABOUT_OG_TITLE,
+      },
       {
         selector: 'meta[property="og:description"]',
         attr: "property",
         key: "og:description",
         value: ABOUT_OG_DESCRIPTION,
       },
-      { selector: 'meta[property="og:image"]', attr: "property", key: "og:image", value: ogImageAbsolute },
+      {
+        selector: 'meta[property="og:image"]',
+        attr: "property",
+        key: "og:image",
+        value: ogImageAbsolute,
+      },
       {
         selector: 'meta[property="og:image:alt"]',
         attr: "property",
@@ -117,7 +127,12 @@ export function About() {
         key: "twitter:image:alt",
         value: OG_IMAGE_ALT,
       },
-      { selector: 'meta[name="description"]', attr: "name", key: "description", value: ABOUT_OG_DESCRIPTION },
+      {
+        selector: 'meta[name="description"]',
+        attr: "name",
+        key: "description",
+        value: ABOUT_OG_DESCRIPTION,
+      },
     ];
 
     type Snapshot = { element: HTMLMetaElement; previous: string | null; created: boolean };
@@ -670,7 +685,7 @@ function LegendItem({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-// Ticket lifecycle visual on a beige panel.
+// Ticket lifecycle visual on a beige panel
 function TicketSection() {
   return (
     <section className="bg-[var(--color-bg)]">
@@ -765,11 +780,7 @@ function StackSection() {
             value="Convex queries, mutations, actions, crons"
             href={CONVEX_URL}
           />
-          <StackItem
-            label="Auth"
-            value="Convex Auth with GitHub OAuth"
-            href={CONVEX_AUTH_URL}
-          />
+          <StackItem label="Auth" value="Convex Auth with GitHub OAuth" href={CONVEX_AUTH_URL} />
           <StackItem
             label="Hosting"
             value="@convex-dev/static-hosting"

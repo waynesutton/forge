@@ -6,11 +6,13 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 
 ### Added
 
+- The in-app Docs references now include Plain GraphQL and Plain thread creation docs so Plain routing work has the same upstream links as Discord, Convex, and auth setup. (2026-05-08 17:51 UTC)
 - Settings can now create a visible Plain test thread from the existing Plain connection test path. The lightweight Test Plain button still only verifies the stored key and workspace, while Create test thread creates a Plain customer and thread using the signed in admin email and returns the Plain thread URL in the success banner. PRD: `prds/plain-routing-diagnostics.md`. (2026-05-02 20:30 UTC)
 - Plain is now an optional per form destination. Admins can configure a Plain API key per connected Discord server, then choose Discord, Plain, or Both in the form editor. Plain submissions create a Plain customer and thread from the saved Forge form answers, send the submitter a custom Discord DM, write audit rows for success or failure, and show a View in Plain link on the results page. (2026-04-30 18:00 UTC)
 
 ### Changed
 
+- Plain thread titles for Discord form submissions now read `Discord form submission request from {name}` instead of the form title plus short submission id. Forge resolves `{name}` from a submitted field whose id or label is `name` or `full name`, then falls back to the Discord submitter name. (2026-05-08 17:43 UTC)
 - Plain only forms with Requires approval now keep the approval queue channel selector visible. Plain only still skips the Discord destination post, but approval review, slash command submission, and submitter DM remain Discord-backed. (2026-05-02 20:30 UTC)
 - Plain routing diagnostics now show clearly in form logs. `plain_thread_failed` and `plain_dm_failed` are classified as errors, `plain_thread_created` has a readable success label, and a Discord DM failure after Plain thread creation no longer gets logged as a Plain API failure. (2026-05-02 20:30 UTC)
 - Destination routing now treats missing `forms.destination` as Discord for backward compatibility. Plain only forms skip the Discord destination post, while Both schedules Plain thread creation separately from the existing Discord publish path so either side can fail without blocking the other. (2026-04-30 18:00 UTC)
@@ -21,7 +23,7 @@ All notable changes to Forge. Format follows [keepachangelog.com](https://keepac
 - `npx convex codegen` clean.
 - `npx tsc --noEmit -p convex/tsconfig.json` clean.
 - `npx tsc --noEmit -p tsconfig.app.json` clean.
-- `npx eslint convex/plain.ts convex/auditLog.ts src/pages/FormLogs.tsx src/pages/EditForm.tsx src/pages/Settings.tsx` clean.
+- `npx eslint convex/plain.ts src/pages/Docs.tsx` clean.
 - `npx convex-doctor@latest` completed with score 90/100 Healthy, matching the repo's current known warning profile.
 
 ## 2026-04-20 02:00 UTC

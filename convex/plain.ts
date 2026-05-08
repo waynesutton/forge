@@ -176,7 +176,11 @@ export const createPlainThread = internalAction({
       });
       threadId = await createThread(key.plainApiKey, {
         customerId,
-        title: buildThreadTitle(context.form.title, context.submission._id),
+        title: buildThreadTitle(
+          context.form.fields,
+          context.submission.values,
+          context.submission.submitterName,
+        ),
         externalId: context.submission._id,
         description: `${context.form.title} submitted by ${context.submission.submitterName}`,
         labelTypeIds: context.form.plainLabelIds,
@@ -406,8 +410,35 @@ function findEmailValue(
   return value && value.length > 0 ? value : undefined;
 }
 
-function buildThreadTitle(formTitle: string, submissionId: string): string {
-  return `${formTitle} (${submissionId.slice(-6)})`.slice(0, 120);
+function buildThreadTitle(
+  fields: Array<PlainField>,
+  values: Record<string, string>,
+  fallbackName: string,
+): string {
+  const name = findNameValue(fields, values) ?? fallbackName.trim();
+  return `Discord form submission request from ${name || "Unknown"}`.slice(0, 120);
+}
+
+function findNameValue(
+  fields: Array<PlainField>,
+  values: Record<string, string>,
+): string | undefined {
+  const nameField = fields.find((field) => {
+    const id = normalizeLookupKey(field.id);
+    const label = normalizeLookupKey(field.label);
+    return (
+      id === "name" ||
+      label === "name" ||
+      id === "fullname" ||
+      label === "fullname"
+    );
+  });
+  const value = nameField ? values[nameField.id]?.trim() : undefined;
+  return value && value.length > 0 ? value : undefined;
+}
+
+function normalizeLookupKey(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function formatPlainError(error: PlainError): string {

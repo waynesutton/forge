@@ -106,6 +106,14 @@ Mirrors `prds/forge-prd_1.md` section 12. Check items off as they ship. Move com
 
 ## Completed
 
+### 2026-05-08 17:43 UTC — Plain Discord form submission titles
+
+- Updated Plain thread creation so new Discord form submissions title Plain threads as `Discord form submission request from {name}` instead of using the form title plus short submission id.
+- `{name}` resolves from a submitted field whose id or label is `name` or `full name`, with the Discord submitter name as the fallback.
+- Added Plain GraphQL and Plain create thread links to the in-app Docs references list.
+- Verified with `npx tsc --noEmit -p convex/tsconfig.json`, `npx tsc --noEmit -p tsconfig.app.json`, targeted ESLint, and `ReadLints`.
+- Files touched: `convex/plain.ts`, `src/pages/Docs.tsx`, `changelog.md`, `TASK.md`, `files.md`.
+
 ### 2026-05-02 20:30 UTC — Plain routing diagnostics and visible test thread
 
 - Added `prds/plain-routing-diagnostics.md` covering the Plain only approval queue bug, hidden Plain error severity, and the difference between checking a Plain key and creating a visible Plain thread.

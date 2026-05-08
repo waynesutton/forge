@@ -700,6 +700,8 @@ After the change, redeploy with \`npm run deploy\` so the new \`index.html\` lan
 - Convex static hosting component: https://www.convex.dev/components/static-hosting/static-hosting.md
 - Convex HTTP actions: https://docs.convex.dev/functions/http-actions
 - Convex dev workflow: https://docs.convex.dev/understanding/workflow
+- Plain GraphQL intro: https://www.plain.com/docs/graphql/introduction
+- Plain create threads: https://www.plain.com/docs/graphql/threads/create
 - Robel Convex Auth repo: https://github.com/robelest/convex-auth/
 - Robel Convex Auth docs: https://auth.estifanos.com/getting-started/installation/
 - GitHub OAuth Apps: https://github.com/settings/developers
